@@ -8,7 +8,7 @@ import com.hmofa.core.lang.tuple.Pair;
 import com.hmofa.core.lang.utils.UtilClassLoader;
 import com.hmofa.core.lang.utils.UtilObject;
 import com.hmofa.core.lang.utils.UtilString;
-import com.hmofa.platform.core.bean.classcache.ClassManager;
+
 
 
 
@@ -51,7 +51,8 @@ public final class Converter {
 		if (cls.isPrimitive() && obj.getClass().getName().equals(getPrimitiveWrap(cls).getName()))
 			return cast(obj);
 		
-		Map<Class<?>, IConvertible<?>> conversionsMap = ClassManager.getConverterConvertibleMap();
+//		Map<Class<?>, IConvertible<?>> conversionsMap = ClassManager.getConverterConvertibleMap();
+		Map<Class<?>, IConvertible<?>> conversionsMap = null;
 		if (!conversionsMap.containsKey(cls))
 			throw new ConversionException(); 	// 不支持的类型转换 (没有对应转换器)
 		
@@ -111,7 +112,8 @@ public final class Converter {
 	public static final Class<?> getPrimitiveWrap(Class<?> cls) {
 		if(isPrimitiveWrap(cls))
 			return cls;
-		Map<Class<?>, Class<?>> primitiveMap = ClassManager.getConverterPrimitiveMap();
+//		Map<Class<?>, Class<?>> primitiveMap = ClassManager.getConverterPrimitiveMap();
+		Map<Class<?>, Class<?>> primitiveMap = null;
 		if (!primitiveMap.containsKey(cls))
 			return cls;		// 没有对应原始类型，返回自己
 		return primitiveMap.get(cls);
@@ -126,7 +128,8 @@ public final class Converter {
 	public static final Class<?> getPrimitive(Class<?> cls) {
 		if (cls.isPrimitive())
 			return cls;
-		Map<Class<?>, Class<?>> primitiveMap = ClassManager.getConverterPrimitiveMap();
+//		Map<Class<?>, Class<?>> primitiveMap = ClassManager.getConverterPrimitiveMap();
+		Map<Class<?>, Class<?>> primitiveMap = null;
 		if (isPrimitiveWrap(cls))
 			return primitiveMap.get(cls);
 		return cls;
@@ -143,7 +146,8 @@ public final class Converter {
 	}
 	
 	public static final boolean isPrimitiveWrap(Class<?> cls) {
-		Map<Class<?>, Class<?>> primitiveMap = ClassManager.getConverterPrimitiveMap();
+//		Map<Class<?>, Class<?>> primitiveMap = ClassManager.getConverterPrimitiveMap();
+		Map<Class<?>, Class<?>> primitiveMap = null;
 		if (!primitiveMap.containsKey(cls))
 			return false;
 		return primitiveMap.get(cls).isPrimitive();

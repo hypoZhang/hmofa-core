@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import com.hmofa.core.exception.ExceptionHelper;
+
 public class NestableDelegate implements Serializable {
 	
 	public NestableDelegate(Nestable nestable) {
@@ -97,6 +99,7 @@ public class NestableDelegate implements Serializable {
 	}
 
 	public void printStackTrace(PrintWriter out) {
+		ExceptionHelper.removeLocal();
 		Throwable throwable = nestable;
 		if (NexceptionUtils.isThrowableNested()) {
 			if (throwable instanceof Nestable)

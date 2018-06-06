@@ -28,6 +28,11 @@
     	<artifactId>exception</artifactId>
     	<version>0.0.9-SNAPSHOT</version>
     </dependency>
+    <dependency>
+    	<groupId>com.hmofa.core.lang</groupId>
+    	<artifactId>hmofa-core-lang</artifactId>
+    	<version>0.0.9-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   <description>统一的 通用 资源 访问 接口。
 

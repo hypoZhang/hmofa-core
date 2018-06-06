@@ -313,11 +313,11 @@ public class UtilDate {
 	}
 
 	public static final long parseLongDate(String srcTime) {
-		return parseDate(srcTime, getDateFormatPattern(srcTime), UniContext.getInstance().getUniLocale()).getTime();
+		return parseDate(srcTime, getDateFormatPattern(srcTime), Locale.getDefault()).getTime();
 	}
 
 	public static final long parseLongDate(String srcTime, String pattern) {
-		return parseDate(srcTime, pattern, UniContext.getInstance().getUniLocale()).getTime();
+		return parseDate(srcTime, pattern, Locale.getDefault()).getTime();
 	}
 	
 	public static final long parseLongDate(String srcTime, String pattern, Locale locale) {
@@ -325,11 +325,11 @@ public class UtilDate {
 	}
 	
 	public static final java.sql.Date parseSqlDate(String srcTime) {
-		return new java.sql.Date(parseDate(srcTime, getDateFormatPattern(srcTime), UniContext.getInstance().getUniLocale()).getTime());
+		return new java.sql.Date(parseDate(srcTime, getDateFormatPattern(srcTime), Locale.getDefault()).getTime());
 	}
 
 	public static final java.sql.Date parseSqlDate(String srcTime, String pattern) {
-		return new java.sql.Date(parseDate(srcTime, pattern, UniContext.getInstance().getUniLocale()).getTime());
+		return new java.sql.Date(parseDate(srcTime, pattern, Locale.getDefault()).getTime());
 	}
 	
 	public static final java.sql.Date parseSqlDate(String srcTime, String pattern, Locale locale) {
@@ -337,11 +337,11 @@ public class UtilDate {
 	}
 	
 	public static final Timestamp parseTimestamp(String srcTime) {
-		return new Timestamp(parseDate(srcTime, getDateFormatPattern(srcTime), UniContext.getInstance().getUniLocale()).getTime());
+		return new Timestamp(parseDate(srcTime, getDateFormatPattern(srcTime), Locale.getDefault()).getTime());
 	}
 	
 	public static final Timestamp parseTimestamp(String srcTime, String pattern) {
-		return new Timestamp(parseDate(srcTime, pattern, UniContext.getInstance().getUniLocale()).getTime());
+		return new Timestamp(parseDate(srcTime, pattern, Locale.getDefault()).getTime());
 	}
 
 	public static final Timestamp parseTimestamp(String srcTime, String pattern, Locale locale) {
@@ -349,11 +349,11 @@ public class UtilDate {
 	}
 	
 	public static final Date parseDate(String srcTime) {
-		return parseDate(srcTime, getDateFormatPattern(srcTime), UniContext.getInstance().getUniLocale());
+		return parseDate(srcTime, getDateFormatPattern(srcTime), Locale.getDefault());
 	}
 
 	public static final Date parseDate(String srcTime, String pattern) {
-		return parseDate(srcTime, pattern, UniContext.getInstance().getUniLocale());
+		return parseDate(srcTime, pattern, Locale.getDefault());
 	}
 
 	/**
@@ -378,17 +378,18 @@ public class UtilDate {
 	private static final boolean isSupportPattern(String patterns) {
 		if (patterns == null)
 			return false;
-		Map<String, Pattern> dateFormatMap = ClassManager.getDatePatternMap();
+//		Map<String, Pattern> dateFormatMap = ClassManager.getDatePatternMap();
+		Map<String, Pattern> dateFormatMap = null;
 		Pattern pattern = dateFormatMap.get(patterns);
 		return pattern != null;
 	}
 
 	public static final String formatDate(long srcTime) {
-		return formatDate(new Date(srcTime), DEFAULT_TIME_FORMAT, UniContext.getInstance().getUniLocale());
+		return formatDate(new Date(srcTime), DEFAULT_TIME_FORMAT, Locale.getDefault());
 	}
 	
 	public static final String formatDate(long srcTime, String pattern) {
-		return formatDate(new Date(srcTime), pattern, UniContext.getInstance().getUniLocale());
+		return formatDate(new Date(srcTime), pattern, Locale.getDefault());
 	}
 	
 	public static final String formatDate(long srcTime, String pattern, Locale locale) {
@@ -396,11 +397,11 @@ public class UtilDate {
 	}
 
 	public static final String formatDate(java.sql.Date srcTime) {
-		return formatDate((Date) srcTime, DEFAULT_TIME_FORMAT, UniContext.getInstance().getUniLocale());
+		return formatDate((Date) srcTime, DEFAULT_TIME_FORMAT, Locale.getDefault());
 	}
 
 	public static final String formatDate(java.sql.Date srcTime, String pattern) {
-		return formatDate((Date) srcTime, pattern, UniContext.getInstance().getUniLocale());
+		return formatDate((Date) srcTime, pattern, Locale.getDefault());
 	}
 	
 	public static final String formatDate(java.sql.Date srcTime, String pattern, Locale locale) {
@@ -408,11 +409,11 @@ public class UtilDate {
 	}
 	
 	public static final String formatDate(Timestamp srcTime) {
-		return formatDate((Date) srcTime, DEFAULT_TIME_FORMAT, UniContext.getInstance().getUniLocale());
+		return formatDate((Date) srcTime, DEFAULT_TIME_FORMAT, Locale.getDefault());
 	}
 
 	public static final String formatDate(Timestamp srcTime, String pattern) {
-		return formatDate((Date) srcTime, pattern, UniContext.getInstance().getUniLocale());
+		return formatDate((Date) srcTime, pattern, Locale.getDefault());
 	}
 
 	public static final String formatDate(Timestamp srcTime, String pattern, Locale locale) {
@@ -420,11 +421,11 @@ public class UtilDate {
 	}
 	
 	public static final String formatDate(Date srcTime) {
-		return formatDate(srcTime, DEFAULT_TIME_FORMAT, UniContext.getInstance().getUniLocale());
+		return formatDate(srcTime, DEFAULT_TIME_FORMAT, Locale.getDefault());
 	}
 	
 	public static final String formatDate(Date srcTime, String pattern) {
-		return formatDate(srcTime, pattern, UniContext.getInstance().getUniLocale());
+		return formatDate(srcTime, pattern, Locale.getDefault());
 	}
 
 	/**
@@ -454,7 +455,8 @@ public class UtilDate {
 	 * @author zhanghaibo3  2016-2-6
 	 */
 	public static String getDateFormatPattern(CharSequence strDate) {
-		Map<String, Pattern> dateFormatMap = ClassManager.getDatePatternMap();
+//		Map<String, Pattern> dateFormatMap = ClassManager.getDatePatternMap();
+		Map<String, Pattern> dateFormatMap = null;
 		Iterator<String> it = dateFormatMap.keySet().iterator();
 		while (it.hasNext()) {
 			String patternstr = it.next();

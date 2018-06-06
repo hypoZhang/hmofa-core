@@ -15,9 +15,16 @@ public class NullArgumentException extends BaseRuntimeException {
 	public NullArgumentException() {
 		super("");
 	}
+	
+	public NullArgumentException(Throwable cause) {
+		super(cause);
+	}
 
 	public NullArgumentException(String argName) {
 		super(argName);
 	}
 
+	public NullArgumentException(String argName, Throwable cause) {
+		super(argName, cause);
+	}
 }

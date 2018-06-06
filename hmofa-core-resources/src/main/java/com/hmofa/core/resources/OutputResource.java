@@ -1,9 +1,11 @@
 package com.hmofa.core.resources;
 
-import java.io.IOException;
+
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
+
+import com.hmofa.core.exception.IOException;
 
 public interface OutputResource extends Resource {
 

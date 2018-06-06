@@ -1,9 +1,11 @@
 package com.hmofa.core.resources;
 
-import java.io.IOException;
+
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+
+import com.hmofa.core.exception.IOException;
 
 public interface Resource {
 
@@ -29,7 +31,7 @@ public interface Resource {
 	 * @throws IOException
 	 * @author hypo zhang  2018-05-30
 	 */
-	long lastModified() throws IOException;
+	long lastModified();
 	
 	/**
 	 * <p>Discription:[资源类型]</p>
@@ -40,7 +42,7 @@ public interface Resource {
 	String getResourceType() throws IOException;
 	
 	/**
-	 * <p>Discription:[当前路径，创建资源]</p>
+	 * <p>Discription:[当前路径，创建新资源]</p>
 	 * @param relative
 	 * @return
 	 * @throws IOException
@@ -49,11 +51,11 @@ public interface Resource {
 	Resource createRelative(String relative) throws IOException;
 	
 	/**
-	 * <p>Discription:[当前资源路径下，所有资源]</p>
+	 * <p>Discription:[当前资源路径下，所有资源名]</p>
 	 * @return
 	 * @author hypo zhang  2018-05-30
 	 */
-	String[] listResource();
+	String[] listResourceName();
 	
 	/**
 	 * <p>Discription:[不带路径的 资源名称]</p>
