@@ -48,21 +48,52 @@ public class UtilResource {
 		}
 	}
 	
-	public static String resolveName(String pathFileName, Class<?> clazz) {
-		if (pathFileName == null)
+	public static String resolvePathSeparator(String filePath) {
+		return filePath != null ? filePath.replace("\\", separator).replaceAll("//", separator) : filePath;
+	}
+	
+	private static final String separator = "/";  // 默认名称分隔符
+	private static final String pathSeparator = ";";   // 默认路径分隔符
+	
+	/**
+	 * <p>Discription:[取类路径，并与输入路径整合]</p>
+	 * @param filePath
+	 * @param clazz
+	 * @return
+	 * @author hypo zhang  2018-06-08
+	 */
+	public static String resolveName(String filePath, Class<?> clazz) {
+		if (filePath == null && clazz == null)
 			return null;
-		if (pathFileName.startsWith("/"))
-			return pathFileName.substring(1);
-		if (clazz == null)
-			return pathFileName;
-		Class<?> c = clazz;
-		while (c.isArray())
-			c = c.getComponentType();
-		String baseName = c.getName();
-		int index = baseName.lastIndexOf('.');
-		if (index != -1)
-			pathFileName = baseName.substring(0, index).replace('.', '/').concat("/").concat(pathFileName);
-		return pathFileName;
+		
+		String classpath = null;
+		if (clazz != null) {
+			Class<?> c = clazz;
+			while (c.isArray())
+				c = c.getComponentType();
+			String baseName = c.getName();
+			int index = baseName.lastIndexOf('.');
+			if (index != -1)
+				classpath = baseName.substring(0, index).replace('.', '/').concat("/");
+		}
+		String filename = null;
+		if (filePath != null) {
+			if (filePath.startsWith("/")) {
+				filename = filePath.substring(1);
+			} else {
+				filename = filePath;
+			}
+		}
+		
+		String path = null;
+		if (classpath != null && filename != null) {
+			path = classpath.concat(filename);
+		} else if (classpath == null) {
+			path = filename;
+		} else if(filename == null) {
+			path = classpath;
+		}
+		return resolvePathSeparator(path);
     }
 	
 	public static String cleanPath(String path) {
@@ -157,7 +188,54 @@ public class UtilResource {
 	}
 	
 	///////////////////////////////////////
+		
+	private static final String replace(String inString, CharSequence target, CharSequence replacement) {
+		if (isEmpty(inString) || isEmpty(target) || replacement == null)
+			return inString;
+		return inString.replace(target, replacement);
+	}
 	
+	private static final boolean isEmpty(CharSequence str) {
+		return str == null || str.length() == 0;
+	}
+	
+	private static String[] toStringArray(Collection<String> collection) {
+		if (collection == null)
+			return EMPTY_STRING_ARRAY;
+		return collection.toArray(new String[collection.size()]);
+	}
+	
+	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+	
+	public static final String CLASSPATH_URL_PREFIX = "classpath:";			// 类装载路径前缀
+	public static final String FILE_URL_PREFIX = "file:";					// 文件系统路径 前缀
+	
+	public static final String JAR_URL_SEPARATOR = "!/";					// jar包路径 分隔符
+
+	
+	public static final String URL_PROTOCOL_JAR = "jar";					// Jar包URL
+	public static final String URL_PROTOCOL_ZIP = "zip";					// 压缩包URL
+	public static final String URL_PROTOCOL_VFSZIP = "vfszip";				// 
+	public static final String URL_PROTOCOL_WSJAR = "wsjar";				// 
+	public static final String URL_PROTOCOL_CODE_SOURCE = "code-source";	// 
+	
+	public static final String URL_PROTOCOL_FILE = "file";					// 文件系统URL
+
+	
+	private static final Set<String> urlZip = new HashSet<String>();
+	static {
+		urlZip.add(URL_PROTOCOL_JAR);
+		urlZip.add(URL_PROTOCOL_JAR.toUpperCase());
+		urlZip.add(URL_PROTOCOL_ZIP);
+		urlZip.add(URL_PROTOCOL_ZIP.toUpperCase());
+		urlZip.add(URL_PROTOCOL_VFSZIP);
+		urlZip.add(URL_PROTOCOL_VFSZIP.toUpperCase());
+		urlZip.add(URL_PROTOCOL_WSJAR);
+		urlZip.add(URL_PROTOCOL_WSJAR.toUpperCase());
+	}
+	
+	
+
 
 	public static File getFile(String resourceLocation) throws IOException {
 		Assert.notNull(resourceLocation, "Resource location must not be null");
@@ -264,53 +342,4 @@ public class UtilResource {
 	
 	//////////////////////////////////////////////////////////////////
 
-	
-
-
-	
-	private static final String replace(String inString, CharSequence target, CharSequence replacement) {
-		if (isEmpty(inString) || isEmpty(target) || replacement == null)
-			return inString;
-		return inString.replace(target, replacement);
-	}
-	
-	private static final boolean isEmpty(CharSequence str) {
-		return str == null || str.length() == 0;
-	}
-	
-	private static String[] toStringArray(Collection<String> collection) {
-		if (collection == null)
-			return EMPTY_STRING_ARRAY;
-		return collection.toArray(new String[collection.size()]);
-	}
-	
-	private static final String[] EMPTY_STRING_ARRAY = new String[0];
-	
-	public static final String CLASSPATH_URL_PREFIX = "classpath:";			// 类装载路径前缀
-	public static final String FILE_URL_PREFIX = "file:";					// 文件系统路径 前缀
-	
-	public static final String JAR_URL_SEPARATOR = "!/";					// jar包路径 分隔符
-
-	
-	public static final String URL_PROTOCOL_JAR = "jar";					// Jar包URL
-	public static final String URL_PROTOCOL_ZIP = "zip";					// 压缩包URL
-	public static final String URL_PROTOCOL_VFSZIP = "vfszip";				// 
-	public static final String URL_PROTOCOL_WSJAR = "wsjar";				// 
-	public static final String URL_PROTOCOL_CODE_SOURCE = "code-source";	// 
-	
-	public static final String URL_PROTOCOL_FILE = "file";					// 文件系统URL
-
-	
-	private static final Set<String> urlZip = new HashSet<String>();
-	static {
-		urlZip.add(URL_PROTOCOL_JAR);
-		urlZip.add(URL_PROTOCOL_JAR.toUpperCase());
-		urlZip.add(URL_PROTOCOL_ZIP);
-		urlZip.add(URL_PROTOCOL_ZIP.toUpperCase());
-		urlZip.add(URL_PROTOCOL_VFSZIP);
-		urlZip.add(URL_PROTOCOL_VFSZIP.toUpperCase());
-		urlZip.add(URL_PROTOCOL_WSJAR);
-		urlZip.add(URL_PROTOCOL_WSJAR.toUpperCase());
-	}
-	
 }

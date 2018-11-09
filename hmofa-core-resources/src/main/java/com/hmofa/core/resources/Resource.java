@@ -51,11 +51,25 @@ public interface Resource {
 	Resource createRelative(String relative) throws IOException;
 	
 	/**
-	 * <p>Discription:[当前资源路径下，所有资源名]</p>
+	 * <p>Discription:[返回父资源。当前资源不存在，或无父资源，返回 null]</p>
 	 * @return
 	 * @author hypo zhang  2018-05-30
 	 */
-	String[] listResourceName();
+	Resource getParentResource();
+	
+	/**
+	 * <p>Discription:[返回绝对路径]</p>
+	 * @return
+	 * @author hypo zhang  2018-06-07
+	 */
+	String getAbsolutePath();
+	
+	/**
+	 * <p>Discription:[返回录入的路径]</p>
+	 * @return
+	 * @author hypo zhang  2018-06-08
+	 */
+	String getPath();
 	
 	/**
 	 * <p>Discription:[不带路径的 资源名称]</p>

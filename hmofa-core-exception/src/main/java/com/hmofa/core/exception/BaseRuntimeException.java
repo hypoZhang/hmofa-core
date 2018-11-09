@@ -26,14 +26,14 @@ public class BaseRuntimeException extends NestableRuntimeException {
 	public BaseRuntimeException(String message, Throwable cause) {
 		super(message, cause);
 	}
+	
+	public Object getAttribute(String name) {
+		return attributes.get(name);
+	}
 		
 	public BaseRuntimeException addAttribute(String name, Object value) {
 		attributes.put(name, value);
 		return this;
-	}
-
-	public Object getAttribute(String name) {
-		return attributes.get(name);
 	}
 	
 	public String toString() {

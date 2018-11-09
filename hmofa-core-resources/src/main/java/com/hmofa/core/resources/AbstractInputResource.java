@@ -26,7 +26,9 @@ public abstract class AbstractInputResource implements InputResource {
 
 	public abstract Resource createRelative(String relative) throws IOException;
 
-	public abstract String[] listResourceName();
+	public abstract Resource getParentResource();
+	
+	public abstract String getAbsolutePath();
 
 	public abstract String getResourceName();
 

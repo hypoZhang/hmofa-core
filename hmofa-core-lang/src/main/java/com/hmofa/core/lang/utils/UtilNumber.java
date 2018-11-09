@@ -413,6 +413,16 @@ public class UtilNumber {
 		Matcher m = dollarString.matcher(expr);
 		return m.matches();
 	}
+	
+	//  取 商
+	public static final long getQuotient(long dividend, long divisor) {
+		return 0;
+	}
+	
+	// 取余数 (模)
+	public static final long getRemainder(long dividend, long divisor) {
+		return 0;
+	}
 
 	private static final Pattern patInt = Pattern.compile("[+-]?\\d+");
 	private static final Pattern patFloat = Pattern.compile("[+-]?\\d+\\x2E\\d+[Ee]?[1-9][0-9]*");

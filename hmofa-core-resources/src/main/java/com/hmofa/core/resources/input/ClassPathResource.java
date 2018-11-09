@@ -1,8 +1,10 @@
 package com.hmofa.core.resources.input;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -24,19 +26,33 @@ import com.hmofa.core.resources.DirectoryResource;
 import com.hmofa.core.resources.Resource;
 import com.hmofa.core.resources.util.UtilResource;
 
+/*
+   *      表述的是  类的加载路径 为根
+ *  1、ClassPathResource(String relative) 表示当前线程  类加载器 为根
+ *  2、ClassPathResource(String relative, Class<?> clazz) 以 clazz 的类加载器为根，clazz表示的路径为 当前路径根。如果clazz为空，则同（1）
+ *  3、ClassPathResource(String relative, ClassLoader classLoader)  以指定的类加载器为根
+ * 
+ */
 public class ClassPathResource extends AbstractInputResource implements DirectoryResource {
 
 	public ClassPathResource(String relative) {
 		this(relative, (ClassLoader) null);
 	}
 
+	/**
+	 * 以 clazz 为相对路径
+	 * @param relative
+	 * @param clazz
+	 */
 	public ClassPathResource(String relative, Class<?> clazz) {
-		String pathToUse = UtilResource.cleanPath(relative);
-		String fullrelative = UtilResource.resolveName(pathToUse, clazz);
-		
+		String pathToUse = UtilResource.resolveName(relative, clazz);
+		String fullrelative = UtilResource.cleanPath(pathToUse);
+				
 		this.claxx = clazz;
 		this.original = relative;
 		this.relative = fullrelative;
+		
+		
 		URL classUrl = clazz == null ? null : clazz.getProtectionDomain().getCodeSource().getLocation();
 		this.jarUrl = classUrl == null ? null : UtilResource.isJarZipURL(classUrl) ? classUrl : null;
 		this.classLoader = clazz == null ? Thread.currentThread().getContextClassLoader() : clazz.getClassLoader();
@@ -57,15 +73,21 @@ public class ClassPathResource extends AbstractInputResource implements Director
 
 	private Class<?> claxx;
 	private String original;
-	private String relative;
-	private ClassLoader classLoader;
-	private String resourceName;
-	private String description;
+	
+	private String relative;			// 包的完整路径
+	private ClassLoader classLoader;    // 类加载器下的包
+	private String resourceName; 		// 资源名称 (不含路径)
+	private String description;			// 资源的描述信息  (通常用于异常显示信息)
+	
 	private URL url;
 	private URL jarUrl;
 
 	public ClassLoader getClassLoader() {
 		return classLoader;
+	}
+	
+	public String getPath() {
+		return original;
 	}
 
 	public String getRelative() {
@@ -194,6 +216,18 @@ public class ClassPathResource extends AbstractInputResource implements Director
 			resourceName = new File(getRelative()).getName();
 		return resourceName;
 	}
+	
+	public Resource getParentResource() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getAbsolutePath() {
+		URL ul = getResource();
+		if (ul != null)
+			return new File(ul.getPath()).getAbsolutePath();
+		return null;
+	}
 
 	public String getDescription() {
 		if (description == null) {
@@ -213,22 +247,6 @@ public class ClassPathResource extends AbstractInputResource implements Director
 	}
 
 	
-
-	public String[] listResourceName() {
-		List<String> list = new ArrayList<String>();
-		if (isCompressedPackage()) {
-			String pathPrefix = new File(getRelative()).getParent();
-			pathPrefix = pathPrefix + "/";
-			Map<String, JarEntry> entryMap = getJarEntryMap(pathPrefix);
-			Iterator<String> it = entryMap.keySet().iterator();
-			while (it.hasNext()) {
-				String path = it.next();
-				list.add(new File(path).getName());
-			}
-		}
-		return list.toArray(new String[0]);
-	}
-	
 	public boolean isDirectory() {
 		if (isCompressedPackage()) {
 			JarEntry entry = getJarEntry();
@@ -243,6 +261,9 @@ public class ClassPathResource extends AbstractInputResource implements Director
 
 	public List<String> list() {
 		List<String> list = new ArrayList<String>();
+		if(isDirectory()) {
+			
+		}
 		if (isCompressedPackage()) {
 			String pathPrefix = new File(getRelative()).getParent();
 			pathPrefix = pathPrefix + "/";
@@ -315,5 +336,22 @@ public class ClassPathResource extends AbstractInputResource implements Director
 			throw new IOException(e);
 		}
 	}
+
+	public List<String> list(FilenameFilter filter) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<File> listFiles(FilenameFilter filter) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<File> listFiles(FileFilter filter) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 
 }
