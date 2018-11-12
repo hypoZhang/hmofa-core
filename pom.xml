@@ -11,6 +11,7 @@
   	<module>hmofa-core-exception</module>
   	<module>hmofa-core-resources</module>
     <module>hmofa-core-lang</module>
+    <module>hmofa-core-examples</module>
   </modules>
   <name>hmofa-core</name>
   
