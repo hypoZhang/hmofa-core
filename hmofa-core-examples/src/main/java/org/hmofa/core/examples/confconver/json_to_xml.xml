@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<BBB>
+		<hello value="nihao" />
+		<hey value="hai" />
+		<people>
+			<d value="dog" />
+			<e>
+				<hello value="nihao" />
+				<hey value="hai" />
+				<tiger>
+					<d value="dog" />
+					<e value="elepahant" />
+					<c value="" />
+				</tiger>
+			</e>
+			<c value="" />
+		</people>
+	</BBB>
+	<AAA>
+		<hello value="nihao" />
+		<hey value="hai" />
+		<world value="hee" />
+	</AAA>
+	<TxnSeq value="1" />
+	<TxnBatchNo value="20170607152322" />
+	<CardNo value="2017000100000003" />
+</xml>
+
+
+<!-- 
+
+
+{
+    "TxnBatchNo": "20170607152322",
+    "TxnSeq": "1",
+    "CardNo": "2017000100000003",
+    "AAA": {
+        "hello": "nihao",
+        "hey": "hai",
+        "world": "hee"
+    },
+    "BBB": [{
+        "hello": "nihao",
+        "hey": "hai",
+        "people": [{
+            "d": "dog",
+            "c": "",
+            "e": [{
+                "hello": "nihao",
+                "hey": "hai",
+                "tiger": [{
+                    "d": "dog",
+                    "c": "",
+                    "e": "elepahant"
+                }]
+            }]
+        }]
+    }]
+}
+
+
+<data>gamma</data>
+<data>delta</data>
+<data>1</data>
+<data>2</data>
+
+{
+   data : [ 
+         ["gamma", "delta"],
+         [1, 2]
+   ]
+}
+
+
+
+-->
