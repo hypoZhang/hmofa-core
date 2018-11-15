@@ -12,10 +12,14 @@ public class UtilClassLoader {
 	 * @author zhanghaibo3  2015-11-3
 	 */
 	public static Class<?> loadClass(String className) throws LoadClassException {
+		return loadClass(className, getDefaultClassLoader());
+	}
+		
+	public static Class<?> loadClass(String className, ClassLoader classLoader) throws LoadClassException {
 		if (UtilString.isWhitespace(className))
 			throw new LoadClassException();
 		try {
-			return getDefaultClassLoader().loadClass(className);
+			return classLoader.loadClass(className);
 		} catch (ClassNotFoundException ex) {
 			try {
 				return Class.forName(className);

@@ -1,6 +1,8 @@
 package com.hmofa.core.lang.format;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.Map;
 import com.hmofa.core.exception.BaseRuntimeException;
 import com.hmofa.core.lang.exception.Assert;
 import com.hmofa.core.lang.tuple.KeyValue;
-import com.hmofa.core.lang.tuple.Tuple;
+import com.hmofa.core.lang.utils.UtilCollection;
 import com.hmofa.core.lang.utils.UtilString;
 
 /**
@@ -22,7 +24,9 @@ import com.hmofa.core.lang.utils.UtilString;
  * @version 1.0
  * @author hypo zhang
  */
-public class PlaceholderParse implements Iterable<KeyValue<String, Boolean>> {
+public class PlaceholderParse implements Serializable, Iterable<Compileholder> {
+
+	private static final long serialVersionUID = -5458290296507277391L;
 
 	public PlaceholderParse(CharSequence string, String placeholderName) {
 		this(string, Placeholder.valueOfs(placeholderName));
@@ -46,17 +50,21 @@ public class PlaceholderParse implements Iterable<KeyValue<String, Boolean>> {
 			Integer endIndex = kv.getKey();
 			String placeholderStr = kv.getValue();
 			String str = originalString.substring(beginIndex, endIndex);
-			compileList.add(Tuple.withKV(str, false));
+			if (str.length() > 0)
+				compileList.add(new Compileholder(str, false, null));
 			
 			beginIndex = endIndex + placeholderStr.length();
 			
-			KeyValue<String, Boolean> placeholderTup = Tuple.withKV(placeholderStr, true);
-			compileList.add(placeholderTup);
+			compileList.add(new Compileholder(placeholderStr, true, placeholder));
+		}
+		if(beginIndex < originalString.length()) {
+			String str = originalString.substring(beginIndex, originalString.length());
+			compileList.add(new Compileholder(str, false, null));
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		for (KeyValue<String, Boolean> kv : compileList) {
-			sb.append(kv.getKey());
+		for (Compileholder kv : compileList) {
+			sb.append(kv.getString());
 		}
 		if (!sb.toString().equals(this.originalString))
 			throw new BaseRuntimeException("编译字符串时发生异常，编译结果与原字符不相符。")
@@ -66,43 +74,45 @@ public class PlaceholderParse implements Iterable<KeyValue<String, Boolean>> {
 		
 		int max = 0;
 //		max = findMax(max);
-		for (KeyValue<String, Boolean> kv : compileList) {
-			if (!kv.getValue())
+		
+		Map<String, VarNameholder> theMap = new LinkedHashMap<String, VarNameholder>();  
+		for (Compileholder holder : compileList) {
+			if (!holder.isPlaceholder())
 				continue;
 
-			KeyValue<String, Boolean> paramKv = null;
-			String placeholderStr = kv.getKey();
-			if (isPaddingNo(kv.getKey())) {
-				paramKv = new KeyValue<String, Boolean>(Integer.toString(max), true);
+			VarNameholder varHolder = null;
+			String varName = holder.getVarName();
+			if (varName == null) {
+				varHolder = new VarNameholder(Integer.toString(max), true);
 				max++;
 			} else {
-				String paramName = null;
-				if (placeholder.isPair())
-					paramName = placeholderStr.substring(placeholder.getPrefix().length(), placeholder.getSuffix().length());
-				else
-					paramName = placeholderStr.substring(placeholder.getPrefix().length(), placeholderStr.length());
-				paramKv = new KeyValue<String, Boolean>(paramName, false);
+				varHolder = new VarNameholder(varName, false);
 			}
-			placeholderMap.put(kv.getTupleUUID(), paramKv);
+			theMap.put(holder.getID(), varHolder);
 		}
-	}
-
-	private boolean isPaddingNo(String holderString) {
-		return placeholder.isNoHaveName() || (placeholder.isNotEssential() && placeholder.holderString().equals(holderString));
+		this.placeholderMap = Collections.unmodifiableMap(theMap);
 	}
 
 	private Placeholder placeholder; // 占位符
 	private String originalString; // 原字符串
 	
-	// 当前字符解析结果   key = string, value = placeholder {yes or no}  true = placeholder
-	private List<KeyValue<String, Boolean>> compileList = new ArrayList<KeyValue<String, Boolean>>(); 
+	// 当前字符解析结果   
+	private List<Compileholder> compileList = new ArrayList<Compileholder>(); 
 	
 	 // key = uuid, value = (key = paramName, value = self num or sys num)  true = sys
-	private Map<String, KeyValue<String, Boolean>> placeholderMap = new LinkedHashMap<String, KeyValue<String, Boolean>>();  
+	private Map<String, VarNameholder> placeholderMap;
 
 	/** key = paramName, value = true 系统编号  false 自编号 */
-	public KeyValue<String, Boolean> getParamNameBy(String placeholderUUID) {
+	public VarNameholder getVarNameBy(String placeholderUUID) {
 		return placeholderMap.get(placeholderUUID);
+	}
+	
+	public Map<String, VarNameholder> getVarNameholderMap() {
+		return placeholderMap;
+	}
+	
+	public List<VarNameholder> getVarNameholders() {
+		return UtilCollection.newListV(placeholderMap);
 	}
 	
 	public String getOriginalString() {
@@ -113,26 +123,26 @@ public class PlaceholderParse implements Iterable<KeyValue<String, Boolean>> {
 		return compileList.isEmpty();
 	}
 
-	public Iterator<KeyValue<String, Boolean>> iterator() {
+	public Iterator<Compileholder> iterator() {
 		return compileList.iterator();
 	}
 	
 	public String toAlreadyCodeParamNameString() {
 		StringBuilder sb = new StringBuilder();
-		for (KeyValue<String, Boolean> kv : compileList) {
-			if (!kv.getValue()) {
-				sb.append(kv.getKey());
+		for (Compileholder kv : compileList) {
+			if (!kv.isPlaceholder()) {
+				sb.append(kv.getString());
 				continue;
 			}
 			
-			KeyValue<String, Boolean> kvParam = getParamNameBy(kv.getTupleUUID());
+			VarNameholder kvParam = getVarNameBy(kv.getID());
 			if (placeholder.isPair()) {
 				sb.append(placeholder.getPrefix());
-				sb.append(kvParam.getKey()).append("[").append(kvParam.getValue()).append("]");
+				sb.append(kvParam.getString()).append("[").append(kvParam.isAutoNO()).append("]");
 				sb.append(placeholder.getSuffix());
 			} else {
 				sb.append("<");
-				sb.append(kvParam.getKey()).append("[").append(kvParam.getValue()).append("]");
+				sb.append(kvParam.getString()).append("[").append(kvParam.isAutoNO()).append("]");
 				sb.append(">");
 			}
 		}
@@ -194,6 +204,7 @@ public class PlaceholderParse implements Iterable<KeyValue<String, Boolean>> {
 	public static final PlaceholderParse paramNameParse(String src) {
 		return new PlaceholderParse(src, Placeholder.PARAMNAME);
 	}
+		
 	
 	/* 
 	 * 占位符分类：

@@ -37,14 +37,6 @@ public abstract class Tuple implements Iterable<Object>, Serializable, Comparabl
 		return this.valueList.get(pos);
 	}
 
-	public final Iterator<Object> iterator() {
-		return this.valueList.iterator();
-	}
-
-	public final String toString() {
-		return this.valueList.toString();
-	}
-
 	public final boolean contains(final Object value) {
 		for (final Object val : this.valueList) {
 			if (val == null) {
@@ -121,6 +113,14 @@ public abstract class Tuple implements Iterable<Object>, Serializable, Comparabl
 	public final Object[] toArray() {
 		return this.valueList.toArray();
 	}
+	
+	public final Iterator<Object> iterator() {
+		return this.valueList.iterator();
+	}
+
+	public final String toString() {
+		return this.valueList.toString();
+	}
 
 	public final int hashCode() {
 		final int prime = 31;
@@ -145,11 +145,16 @@ public abstract class Tuple implements Iterable<Object>, Serializable, Comparabl
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public final int compareTo(final Tuple o) {
-		final int tLen = this.valueList.size();
+		final int tLen = valueList.size();
 		final int oLen = o.valueList.size();
 
 		for (int i = 0; i < tLen && i < oLen; i++) {
-			final Comparable tElement = (Comparable) this.valueList.get(i);
+			Object thisObj = valueList.get(i);
+			Object cmpaObj = o.valueList.get(i);
+			if(!(thisObj instanceof Comparable && cmpaObj instanceof Comparable))
+				continue;
+			
+			final Comparable tElement = (Comparable) valueList.get(i);
 			final Comparable oElement = (Comparable) o.valueList.get(i);
 			final int comparison = tElement.compareTo(oElement);
 			if (comparison != 0) {

@@ -1,16 +1,19 @@
 package com.hmofa.core.lang.format;
 
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.hmofa.core.exception.BaseRuntimeException;
 import com.hmofa.core.exception.CloneNotSupportedException;
 import com.hmofa.core.lang.ICloneable;
-import com.hmofa.core.lang.tuple.KeyValue;
+
 
 /**
  * 
@@ -21,8 +24,10 @@ import com.hmofa.core.lang.tuple.KeyValue;
  * @version 1.0
  * @author hypo zhang
  */
-public class StringFormat implements ICloneable<StringFormat> {
+public class StringFormat implements Serializable, ICloneable<StringFormat> {
 	
+	private static final long serialVersionUID = 6985636127148740390L;
+
 	public static String format(String src, Object... values) {
 		return formatMsg(src, values);
 	}
@@ -65,44 +70,6 @@ public class StringFormat implements ICloneable<StringFormat> {
 		}
 	}
 		
-	public String toString() {
-		
-		StringBuilder sb = new StringBuilder();
-		Set<KeyValue<String, Boolean>> paramAlready = this.append ? new HashSet<KeyValue<String, Boolean>>() : null;
-		
-		Iterator<KeyValue<String, Boolean>> it = parse.iterator();
-		while (it.hasNext()) {
-			KeyValue<String, Boolean> kv = it.next();
-			if (!kv.getValue()) {
-				sb.append(kv.getKey());
-				continue;
-			}
-			
-			String placeholderStr = kv.getKey();
-			KeyValue<String, Boolean> paramName = parse.getParamNameBy(kv.getTupleUUID());
-			
-			// 允许替换值为 null， 设置了参数，则取参数值，否则用替换字符
-			Object value = !repNameValMap.containsKey(paramName) ? placeholderStr : repNameValMap.get(paramName);
-			sb.append(value == null ? "" : value);
-			
-			if (paramAlready != null)
-				paramAlready.add(paramName);
-		}
-		// 添加追加  值
-		if (paramAlready != null) {
-			Iterator<KeyValue<String, Boolean>> its = repNameValMap.keySet().iterator();
-			while (its.hasNext()) {
-				KeyValue<String, Boolean> paramName = its.next();
-				if (paramName.getValue() && !paramAlready.contains(paramName)) {
-					Object value = repNameValMap.get(paramName);
-					sb.append(value == null ? "" : appendSeparator);
-					sb.append(value == null ? "" : value);
-				}
-			}
-		}
-		return sb.toString().trim();
-	}
-	
 	// 分自编号，和系统编号。 自编号 与 指定参数名  相同， 系统编号   为顺序索引位
 	
 	protected StringFormat(PlaceholderParse placeholderParse) {
@@ -117,6 +84,69 @@ public class StringFormat implements ICloneable<StringFormat> {
 		this.parse = placeholderParse;
 		this.append = append;
 		this.appendSeparator = appendSeparator == null ? "" : appendSeparator;
+	}
+	
+	public String toString() {
+		
+		StringBuilder sb = new StringBuilder();
+		Set<VarNameholder> paramAlready = this.append ? new HashSet<VarNameholder>() : null;
+		
+		Iterator<Compileholder> it = parse.iterator();
+		while (it.hasNext()) {
+			Compileholder kv = it.next();
+			if (!kv.isPlaceholder()) {
+				sb.append(kv.getString());
+				continue;
+			}
+			
+			String placeholderStr = kv.getString();
+			VarNameholder paramName = parse.getVarNameBy(kv.getID());
+			
+			// 允许替换值为 null， 设置了参数，则取参数值，否则用替换字符
+			Object value = !repNameValMap.containsKey(paramName) ? placeholderStr : repNameValMap.get(paramName);
+			sb.append(value == null ? "" : value);
+			
+			if (paramAlready != null)
+				paramAlready.add(paramName);
+		}
+		// 添加追加  值
+		if (paramAlready != null) {
+			Iterator<VarNameholder> its = repNameValMap.keySet().iterator();
+			while (its.hasNext()) {
+				VarNameholder paramName = its.next();
+				if (paramName.isAutoNO() && !paramAlready.contains(paramName)) {
+					Object value = repNameValMap.get(paramName);
+					sb.append(value == null ? "" : appendSeparator);
+					sb.append(value == null ? "" : value);
+				}
+			}
+		}
+		return sb.toString().trim();
+	}
+	
+	public List<VarNameholder> getVarNameholders() {
+		return parse.getVarNameholders();
+	}
+	
+	/**
+	 * <p>Discription:[未设置值的 占位符]</p>
+	 * @return
+	 * @author hypo zhang  2018-11-15
+	 */
+	public List<VarNameholder> remainVarNameholder() {
+		
+		List<VarNameholder> remain = new ArrayList<VarNameholder>();
+		Iterator<Compileholder> it = parse.iterator();
+		while (it.hasNext()) {
+			Compileholder kv = it.next();
+			if (!kv.isPlaceholder()) 
+				continue;
+			
+			VarNameholder varName = parse.getVarNameBy(kv.getID());
+			if(!repNameValMap.containsKey(varName))
+				remain.add(varName);
+		}
+		return remain;
 	}
 	
 	public StringFormat clone() throws CloneNotSupportedException {
@@ -149,7 +179,7 @@ public class StringFormat implements ICloneable<StringFormat> {
 	 * @author hypo zhang  2018-11-15
 	 */
 	public final StringFormat addFormatValue(int index, Object value) {
-		repNameValMap.put(new KeyValue<String, Boolean>(Integer.toString(index), true), value);
+		repNameValMap.put(new VarNameholder(Integer.toString(index), true), value);
 		return this;
 	}
 		
@@ -167,7 +197,7 @@ public class StringFormat implements ICloneable<StringFormat> {
 	public final StringFormat addFormatValueBy(String paramName, Object value) {
 		if (paramName == null || paramName.length() == 0)
 			throw new BaseRuntimeException("参数名不能为空。");
-		repNameValMap.put(new KeyValue<String, Boolean>(paramName, false), value);
+		repNameValMap.put(new VarNameholder(paramName, false), value);
 		return this;
 	}
 	
@@ -179,7 +209,7 @@ public class StringFormat implements ICloneable<StringFormat> {
 		return parse;
 	}
 	
-	private Map<KeyValue<String, Boolean>, Object> repNameValMap = new LinkedHashMap<KeyValue<String, Boolean>, Object>();
+	private Map<VarNameholder, Object> repNameValMap = new LinkedHashMap<VarNameholder, Object>();
 	
 	private PlaceholderParse parse;
 	
