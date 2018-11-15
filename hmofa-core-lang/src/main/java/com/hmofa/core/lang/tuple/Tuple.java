@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import com.hmofa.core.exception.IllegalArgumentException;
 
@@ -15,6 +16,8 @@ public abstract class Tuple implements Iterable<Object>, Serializable, Comparabl
 	private static final long serialVersionUID = 7356642269953815356L;
 
 	private final List<Object> valueList;
+	
+	private String tupleUUID = UUID.randomUUID().toString().replace("-", "");
 
 	public abstract int getSize();
 
@@ -22,6 +25,10 @@ public abstract class Tuple implements Iterable<Object>, Serializable, Comparabl
 		this.valueList = Arrays.asList(values);
 	}
 
+	public String getTupleUUID() {
+		return tupleUUID;
+	}
+	
 	public final Object getValue(final int pos) {
 		if (pos >= getSize()) {
 			throw new IllegalArgumentException("Cannot retrieve position " + pos + " in " + this.getClass().getSimpleName()

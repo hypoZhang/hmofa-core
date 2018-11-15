@@ -29,6 +29,18 @@ import com.hmofa.core.lang.tuple.Tuple;
  */
 public class UtilString {
 
+	public static final boolean isNotNull(CharSequence str) {
+		return !isNull(str);
+	}
+	
+	public static final boolean isNull(CharSequence str) {
+		return str == null;
+	}
+	
+	public static final boolean isNotEmpty(CharSequence str) {
+		return !isEmpty(str);
+	}
+	
 	/**
 	 * <p>Discription:[是否为空]</p>
 	 * <pre>
@@ -45,15 +57,9 @@ public class UtilString {
 	public static final boolean isEmpty(CharSequence str) {
 		return str == null || str.length() == 0;
 	}
-
-	/**
-	 * <p>Discription:[是否不为空]</p>
-	 * @param str
-	 * @return 空 false , 非空 true
-	 * @author zhanghaibo3  2015-11-2
-	 */
-	public static final boolean isNotEmpty(CharSequence str) {
-		return isEmpty(str);
+	
+	public static final boolean isNotWhitespace(CharSequence str) {
+		return !isWhitespace(str);
 	}
 
 	/**
@@ -84,16 +90,8 @@ public class UtilString {
 		}
 		return true;
 	}
-
-	/**
-	 * <p>Discription:[是否不为空]</p>
-	 * @param str
-	 * @return 空 false , 非空 true
-	 * @author 张海波  2015-11-2
-	 */
-	public static final boolean isNotWhitespace(CharSequence str) {
-		return !isWhitespace(str);
-	}
+	
+	private static final BigDecimal divnum2 = new BigDecimal("2");
 	
 	public static final boolean equals(CharSequence str1, CharSequence str2) {
 		return str1 == null ? str2 == null : str2 == null ? false : str1.toString().equals(str2.toString());
@@ -108,6 +106,159 @@ public class UtilString {
 			return inString;
 		return inString.replace(target, replacement);
 	}
+	
+	public static int lengthB(CharSequence csq) {
+		return lengthB(csq, StringCoder.UTF_8);
+	}
+	
+	public static int lengthB(CharSequence csq, Charset charset) {
+		return lengthB(csq, StringCoder.charsetName(charset));
+	}
+	
+	/**
+	 * <p>Discription:[统计字符串 按指定编码 字节数]</p>
+	 * @param csq
+	 * @param charsetName  utf8 utf16 gbk
+	 * @return
+	 * @author zhanghaibo3  2016-12-30
+	 */
+	public static int lengthB(CharSequence csq, String charsetName) {
+		int total = 0;
+		String ncharset = charsetName == null ? "utf-8" : charsetName.toLowerCase();
+		String txt = csq.toString();
+		if ("utf-16".equalsIgnoreCase(ncharset) || "utf16".equalsIgnoreCase(ncharset)) {
+			for (int i = 0, len = csq.length(); i < len; i++) {
+				int charCode = txt.codePointAt(i);
+				if (charCode <= 0xffff) { // 65535
+					total += 2;
+				} else {
+					total += 4;
+				}
+			}
+		} else if ("utf-8".equalsIgnoreCase(ncharset) || "utf8".equalsIgnoreCase(ncharset)) {
+			for (int i = 0, len = txt.length(); i < len; i++) {
+				int charCode = txt.codePointAt(i);
+				if (charCode <= 0x007f) { // 127
+					total += 1;
+				} else if (charCode > 0x007f && charCode <= 0x07ff) { // 2047
+					total += 2;
+				} else if (charCode > 0x07ff && charCode <= 0xffff) { // 65535
+					total += 3;
+				} else {
+					total += 4;
+				}
+			}
+		} else if ("gbk".equalsIgnoreCase(ncharset) || "gb2312".equalsIgnoreCase(ncharset) || "big5".equalsIgnoreCase(ncharset)) {
+			for (int i = 0, len = txt.length(); i < len; i++) {
+				int charCode = txt.codePointAt(i);
+				if (charCode <= 0x007f) {// 127
+					total += 1;
+				} else {
+					total += 2;
+				}
+			}
+		}
+		total = total == 0 ? StringCoder.encode(txt, ncharset).length : total;
+		return total;
+	}
+	
+	/**
+	 * <p>Discription:[是否Ascii全角字符]</p>
+	 * <pre>
+	 * ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ  		 -- 全角
+	 * ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ　		 -- 全角
+	 * ～｀！＠＃＄％＾＆＊（）－＿＋＝｛｝［］｜＼：；＂＇＜＞，．？　／  -- 全角
+	 * 
+	 * abcdefghijklmnopqrstuvwxyz  				 -- 半角
+	 * ABCDEFGHIJKLMNOPQRSTUVWXYZ  				 -- 半角
+	 * ~`!@#$%^&*()-_+={}[]|\:;"'<>,.? /		 -- 半角
+	 * </pre>
+	 * @param ch
+	 * @return  全角  true 半角 false
+	 * @author zhanghaibo3  2016-10-10
+	 */
+	public static boolean isAsciiFullAngle(char ch) {
+		return (ch >= 65281 && ch <= 65374) || ch == 12288;
+	}
+	
+	/**
+	 * <p>Discription:[是否Ascii半角字符]</p>
+	 * @param ch
+	 * @return 半角  true  全角  false
+	 * @author zhanghaibo3  2016-10-10
+	 */
+	public static boolean isAsciiHalfAngle(char ch) {
+		return (ch >= 33 && ch <= 126) || ch == 32;
+	}
+	
+	
+	public static boolean containsAsciiFullAngle(String str) {
+		if (isEmpty(str))
+			return false;
+		for (int i = 0, len = str.length(); i < len; i++) {
+			if (isAsciiFullAngle(str.charAt(i)))
+				return true;
+		}
+		return false;
+	}
+	
+	public static boolean containsAsciiHalfAngle(String str) {
+		if (isEmpty(str))
+			return false;
+		for (int i = 0, len = str.length(); i < len; i++) {
+			if (isAsciiHalfAngle(str.charAt(i)))
+				return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * <p>Discription:[Ascii半角字符转换为全角字符]</p>
+	 * @param ch
+	 * @return 如果是半角字符则转换为全角，否则原值返回
+	 * @author zhanghaibo3  2016-10-10
+	 */
+	public static char toAsciiFullAngle(char ch) {
+		char chs = ch;
+		if (isAsciiHalfAngle(chs))
+			chs = chs == 32 ? 12288 : (char) (chs + 65248);
+		return chs;
+	}
+	
+	/**
+	 * <p>Discription:[Ascii全角字符转换为半角字符]</p>
+	 * @param ch
+	 * @return 如果是全角字符则转换为半角，否则原值返回
+	 * @author zhanghaibo3  2016-10-10
+	 */
+	public static char toAsciiHalfAngle(char ch) {
+		char chs = ch;
+		if (isAsciiFullAngle(chs))
+			chs = chs == 12288 ? 32 : (char) (chs - 65248);
+		return chs;
+	}
+	
+	
+	public static String toAsciiFullAngle(CharSequence inString) {
+		if (inString == null)
+			return null;
+		StringBuilder sb = new StringBuilder(inString.length());
+		for (int i = 0; i < inString.length(); i++)
+			sb.append(toAsciiFullAngle(inString.charAt(i)));
+		return sb.toString();
+	}
+	
+	public static String toAsciiHalfAngle(CharSequence inString) {
+		if (inString == null)
+			return null;
+		StringBuilder sb = new StringBuilder(inString.length());
+		for (int i = 0; i < inString.length(); i++)
+			sb.append(toAsciiHalfAngle(inString.charAt(i)));
+		return sb.toString();
+	}
+	
+	
 	
 	/**
 	 * <p>Discription:[查找 正则表达式值 在字符串所出现的索引位置]</p>
@@ -167,199 +318,12 @@ public class UtilString {
 		return list;
 	}
 	
-
-	/**
-	 * <p>Discription:[是否Ascii全角字符]</p>
-	 * <pre>
-	 * ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ  		 -- 全角
-	 * ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ　		 -- 全角
-	 * ～｀！＠＃＄％＾＆＊（）－＿＋＝｛｝［］｜＼：；＂＇＜＞，．？　／  -- 全角
-	 * 
-	 * abcdefghijklmnopqrstuvwxyz  				 -- 半角
-	 * ABCDEFGHIJKLMNOPQRSTUVWXYZ  				 -- 半角
-	 * ~`!@#$%^&*()-_+={}[]|\:;"'<>,.? /		 -- 半角
-	 * </pre>
-	 * @param ch
-	 * @return  全角  true 半角 false
-	 * @author zhanghaibo3  2016-10-10
-	 */
-	public static boolean isAsciiFullAngle(char ch) {
-		return (ch >= 65281 && ch <= 65374) || ch == 12288;
-	}
-	
-	public static boolean isExistsAsciiFullAngle(String str) {
-		if (isEmpty(str))
-			return false;
-		for (int i = 0, len = str.length(); i < len; i++) {
-			if (isAsciiFullAngle(str.charAt(i)))
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * <p>Discription:[Ascii半角字符转换为全角字符]</p>
-	 * @param ch
-	 * @return 如果是半角字符则转换为全角，否则原值返回
-	 * @author zhanghaibo3  2016-10-10
-	 */
-	public static char toAsciiFullAngle(char ch) {
-		char chs = ch;
-		if (isAsciiHalfAngle(chs))
-			chs = chs == 32 ? 12288 : (char) (chs + 65248);
-		return chs;
-	}
-
-	/**
-	 * <p>Discription:[是否Ascii半角字符]</p>
-	 * @param ch
-	 * @return 半角  true  全角  false
-	 * @author zhanghaibo3  2016-10-10
-	 */
-	public static boolean isAsciiHalfAngle(char ch) {
-		return (ch >= 33 && ch <= 126) || ch == 32;
-	}
-	
-	
-	public static boolean isExistsAsciiHalfAngle(String str) {
-		if (isEmpty(str))
-			return false;
-		for (int i = 0, len = str.length(); i < len; i++) {
-			if (isAsciiHalfAngle(str.charAt(i)))
-				return true;
-		}
-		return false;
-	}
-	
-	
-	/**
-	 * <p>Discription:[Ascii全角字符转换为半角字符]</p>
-	 * @param ch
-	 * @return 如果是全角字符则转换为半角，否则原值返回
-	 * @author zhanghaibo3  2016-10-10
-	 */
-	public static char toAsciiHalfAngle(char ch) {
-		char chs = ch;
-		if (isAsciiFullAngle(chs))
-			chs = chs == 12288 ? 32 : (char) (chs - 65248);
-		return chs;
-	}
-	
-	/**
-	 * <p>Discription:[查找全角字符索引位置]</p>
-	 * @param fullAngleStr
-	 * @return 未找到  -1 , 否则返回实际索引值
-	 * @author zhanghaibo3  2016-10-10
-	 */
-	public static int indexOfAsciiFullAngle(String fullAngleStr) {
-		return indexOfAsciiFullAngle(fullAngleStr, 0);
-	}
-
-	/**
-	 * <p>Discription:[从指定索引及之后查找全角字符索引位置]</p>
-	 * @param fullAngleStr
-	 * @param offset
-	 * @return 未找到  -1 , 否则返回实际索引值
-	 * @author zhanghaibo3  2016-10-10
-	 */
-	public static int indexOfAsciiFullAngle(String fullAngleStr, int offset) {
-		if (isEmpty(fullAngleStr))
-			return -1;
-		for (int i = offset; i < fullAngleStr.length(); i++) {
-			char chs = fullAngleStr.charAt(i);
-			if (isAsciiFullAngle(chs))
-				return i;
-		}
-		return -1;
-	}
-
-	/**
-	 * <p>Discription:[包含Ascii全角字符符号]</p>
-	 * @param string
-	 * @return
-	 * @author zhanghaibo3  2016-1-21
-	 */
-	public static boolean containsAsciiFullAngle(String string) {
-		return indexOfAsciiFullAngle(string, 0) != -1;
-	}
-
 	public static boolean isJPFullAngle(char ch) {
 		if (isAsciiFullAngle(ch))
 			return true;
 		if ((ch >= 65377 && ch <= 65439)) // 日文全角，对应的半角暂不清楚
 			return true;
 		return false;
-	}
-	
-
-	
-	/**
-	 * <p>Discription:[替换字符串全角字符 为 半角字符]</p>
-	 * @param inString
-	 * @return 返回新的字符串
-	 * @author zhanghaibo3  2016-1-22
-	 */
-	public static String replaceToAsciiHalfAngle(String inString) {
-		StringBuilder sb = new StringBuilder(inString.length());
-		for (int i = 0; i < inString.length(); i++)
-			sb.append(toAsciiHalfAngle(inString.charAt(i)));
-		return sb.toString();
-	}
-	
-	
-	public static int lengthB(CharSequence csq) {
-		return lengthB(csq, StringCoder.lookupCharset(StringCoder.UTF_8));
-	}
-	
-	public static int lengthB(CharSequence csq, Charset charset) {
-		return lengthB(csq, StringCoder.charsetName(charset));
-	}
-	
-	/**
-	 * <p>Discription:[统计字符串 按指定编码 字节数]</p>
-	 * @param csq
-	 * @param charsetName  支持  utf8 utf16 gbk
-	 * @return
-	 * @author zhanghaibo3  2016-12-30
-	 */
-	public static int lengthB(CharSequence csq, String charsetName) {
-		int total = 0;
-		String ncharset = charsetName == null ? "utf-8" : charsetName.toLowerCase();
-		String txt = csq.toString();
-		if ("utf-16".equalsIgnoreCase(ncharset) || "utf16".equalsIgnoreCase(ncharset)) {
-			for (int i = 0, len = csq.length(); i < len; i++) {
-				int charCode = txt.codePointAt(i);
-				if (charCode <= 0xffff) { // 65535
-					total += 2;
-				} else {
-					total += 4;
-				}
-			}
-		} else if ("utf-8".equalsIgnoreCase(ncharset) || "utf8".equalsIgnoreCase(ncharset)) {
-			for (int i = 0, len = txt.length(); i < len; i++) {
-				int charCode = txt.codePointAt(i);
-				if (charCode <= 0x007f) { // 127
-					total += 1;
-				} else if (charCode <= 0x07ff) { // 2047
-					total += 2;
-				} else if (charCode <= 0xffff) { // 65535
-					total += 3;
-				} else {
-					total += 4;
-				}
-			}
-		} else if ("gbk".equalsIgnoreCase(ncharset) || "gb2312".equalsIgnoreCase(ncharset) || "big5".equalsIgnoreCase(ncharset)) {
-			for (int i = 0, len = txt.length(); i < len; i++) {
-				int charCode = txt.codePointAt(i);
-				if (charCode <= 0x007f) {// 127
-					total += 1;
-				} else {
-					total += 2;
-				}
-			}
-		}
-		total = total == 0 ? txt.length() : total;
-		return total;
 	}
 	
 	public static final PadAtChar padAtChar = new PadAtChar();
@@ -409,5 +373,4 @@ public class UtilString {
 		return list.toArray(new String[list.size()]);
 	}
 
-	private static final BigDecimal divnum2 = new BigDecimal("2");
 }

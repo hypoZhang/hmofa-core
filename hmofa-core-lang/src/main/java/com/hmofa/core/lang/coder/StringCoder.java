@@ -160,7 +160,7 @@ public final class StringCoder {
 	 */
 	public static Charset lookupCharset(String charsetName) throws CharsetException {
 		Assert.notNull(charsetName);
-		return cacheCharset(charsetName);
+		return lookupCharset0(charsetName);
 	}
 
 	public static boolean isCharset(String charsetName) {
@@ -175,13 +175,21 @@ public final class StringCoder {
 
 	public static String charsetName(Charset charset) {
 		Assert.notNull(charset);
-		return charset.name().toUpperCase();
+		return charsetName0(charset);
 	}
 
+	private static String charsetName0(Charset charset) {
+		return charset.name();
+	}
+
+	private static Charset lookupCharset0(String charsetName) throws CharsetException {
+		return cacheCharset(charsetName);
+	}
+	
 	private static StringCoder cacheStringCoder(Object charsetName) {
 		if (stringCoderCache.containsKey(charsetName))
 			return stringCoderCache.get(charsetName);
-		String csn = charsetName instanceof String ? charsetName.toString().toLowerCase() : charsetName((Charset) charsetName);
+		String csn = charsetName instanceof Charset ? charsetName((Charset) charsetName) : charsetName.toString().toLowerCase();
 		synchronized (stringCoderCache) {
 			if (stringCoderCache.containsKey(csn))
 				return stringCoderCache.get(csn);
@@ -197,28 +205,28 @@ public final class StringCoder {
 	private static Charset cacheCharset(Object charsetName) {
 		if (charsetCache.containsKey(charsetName))
 			return charsetCache.get(charsetName);
-		String csn = charsetName.toString().toLowerCase();
-		try {
-			synchronized (charsetCache) {
+		
+		if (charsetName == null)
+			return null;
+		
+		String csn = charsetName.toString();
+		synchronized (charsetCache) {
+			try {
 				if (charsetCache.containsKey(csn))
 					return charsetCache.get(csn);
-				Charset charset = null;
-				if (charsetName instanceof Charset)
-					charset = (Charset) charsetName;
-				else
-					charset = Charset.forName(csn);
+				Charset charset = charsetName instanceof Charset ? (Charset) charsetName : Charset.forName(csn);
 				csn = charsetName(charset);
 				charsetCache.put(csn, charset);
 				charsetCache.put(csn.toLowerCase(), charset);
 				charsetCache.put(csn.toUpperCase(), charset);
 				return charsetCache.get(csn);
+			} catch (IllegalCharsetNameException ex) {
+				throw new CharsetException(ex); // 字符集名称错误 (中文或其它字符)
+			} catch (UnsupportedCharsetException x) {
+				throw new CharsetException(x); // 不支持的字符集 (名称正确)
+			} catch (IllegalArgumentException e) {
+				throw new CharsetException(e); // 参数错误
 			}
-		} catch (IllegalCharsetNameException ex) {
-			throw new CharsetException(ex); // 字符集名称错误 (中文或其它字符)
-		} catch (UnsupportedCharsetException x) {
-			throw new CharsetException(x); // 不支持的字符集 (名称正确)
-		} catch (IllegalArgumentException e) {
-			throw new CharsetException(e); // 参数错误
 		}
 	}
 
@@ -285,16 +293,13 @@ public final class StringCoder {
 
 	public static final String DEFAULT_UNI_CHARSET_NAME = charsetName(DEFAULT_UNI_CHARSET);
 
+	
 	public static byte[] encode(CharSequence charseq) {
-		if (UtilString.isEmpty(charseq))
-			return UtilArray.EMPTY_BYTE_ARRAY;
-		return encode(charseq, 0, charseq.length(), DEFAULT_UNI_CHARSET);
+		return encode(charseq, DEFAULT_UNI_CHARSET);
 	}
 
 	public static byte[] encode(CharSequence charseq, String charsetName) {
-		if (UtilString.isEmpty(charseq) || UtilString.isEmpty(charsetName))
-			return UtilArray.EMPTY_BYTE_ARRAY;
-		return encode(charseq, 0, charseq.length(), lookupCharset(charsetName));
+		return encode(charseq, lookupCharset0(charsetName));
 	}
 
 	public static byte[] encode(CharSequence charseq, Charset charset) {
@@ -304,15 +309,11 @@ public final class StringCoder {
 	}
 
 	public static byte[] encode(CharSequence charseq, int off, int len) {
-		if (UtilString.isEmpty(charseq))
-			return UtilArray.EMPTY_BYTE_ARRAY;
 		return encode(charseq, off, len, DEFAULT_UNI_CHARSET);
 	}
 
 	public static byte[] encode(CharSequence charseq, int off, int len, String charsetName) {
-		if (UtilString.isEmpty(charseq) || UtilString.isEmpty(charsetName))
-			return UtilArray.EMPTY_BYTE_ARRAY;
-		return encode(charseq, off, len, lookupCharset(charsetName));
+		return encode(charseq, off, len, lookupCharset0(charsetName));
 	}
 
 	/**
@@ -334,15 +335,13 @@ public final class StringCoder {
 	}
 
 	public static byte[] encode(char... ca) {
-		if (UtilArray.isEmpty(ca))
-			return UtilArray.EMPTY_BYTE_ARRAY;
-		return encode(0, ca.length, DEFAULT_UNI_CHARSET, ca);
+		return encode(DEFAULT_UNI_CHARSET, ca);
 	}
 
 	public static byte[] encode(String charsetName, char... ca) {
 		if (UtilArray.isEmpty(ca) || UtilString.isEmpty(charsetName))
 			return UtilArray.EMPTY_BYTE_ARRAY;
-		return encode(0, ca.length, lookupCharset(charsetName), ca);
+		return encode(lookupCharset0(charsetName), ca);
 	}
 
 	public static byte[] encode(Charset charset, char... ca) {
@@ -356,7 +355,7 @@ public final class StringCoder {
 	}
 
 	public static byte[] encode(int off, int len, String charsetName, char... ca) {
-		return encode(off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset(charsetName), ca);
+		return encode(off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset0(charsetName), ca);
 	}
 
 	public static byte[] encode(int off, int len, Charset charset, char... ca) {
@@ -375,7 +374,7 @@ public final class StringCoder {
 	public static void encode(OutputStream out, CharSequence charseq, String charsetName) {
 		if (UtilString.isEmpty(charseq) || UtilString.isEmpty(charsetName))
 			return;
-		encode(out, charseq, 0, charseq.length(), lookupCharset(charsetName));
+		encode(out, charseq, 0, charseq.length(), lookupCharset0(charsetName));
 	}
 
 	public static void encode(OutputStream out, CharSequence charseq, Charset charset) {
@@ -389,7 +388,7 @@ public final class StringCoder {
 	}
 
 	public static void encode(OutputStream out, CharSequence charseq, int off, int len, String charsetName) {
-		encode(out, charseq, off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset(charsetName));
+		encode(out, charseq, off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset0(charsetName));
 	}
 
 	/**
@@ -417,7 +416,7 @@ public final class StringCoder {
 	public static void encode(OutputStream out, String charsetName, char... ca) {
 		if (UtilArray.isEmpty(ca) || UtilString.isEmpty(charsetName))
 			return;
-		encode(out, 0, ca.length, lookupCharset(charsetName), ca);
+		encode(out, 0, ca.length, lookupCharset0(charsetName), ca);
 	}
 
 	public static void encode(OutputStream out, Charset charset, char... ca) {
@@ -431,7 +430,7 @@ public final class StringCoder {
 	}
 
 	public static void encode(OutputStream out, int off, int len, String charsetName, char... ca) {
-		encode(out, off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset(charsetName), ca);
+		encode(out, off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset0(charsetName), ca);
 	}
 
 	public static void encode(OutputStream out, int off, int len, Charset charset, char... ca) {
@@ -475,13 +474,13 @@ public final class StringCoder {
 	public static String decode(String charsetName, byte... ba) {
 		if (UtilArray.isEmpty(ba) || UtilString.isEmpty(charsetName))
 			return "";
-		return new String(decodeChar(0, ba.length, lookupCharset(charsetName), ba));
+		return new String(decodeChar(0, ba.length, lookupCharset0(charsetName), ba));
 	}
 
 	public static String decode(int off, int len, String charsetName, byte... ba) {
 		if (UtilArray.isEmpty(ba) || UtilString.isEmpty(charsetName))
 			return "";
-		return new String(decodeChar(off, len, lookupCharset(charsetName), ba));
+		return new String(decodeChar(off, len, lookupCharset0(charsetName), ba));
 	}
 
 	public static String decode(Charset charset, byte... ba) {
@@ -505,7 +504,7 @@ public final class StringCoder {
 	public static char[] decodeChar(String charsetName, byte... ba) {
 		if (UtilArray.isEmpty(ba) || UtilString.isEmpty(charsetName))
 			return UtilArray.EMPTY_CHAR_ARRAY;
-		return decodeChar(0, ba.length, lookupCharset(charsetName), ba);
+		return decodeChar(0, ba.length, lookupCharset0(charsetName), ba);
 	}
 
 	public static char[] decodeChar(Charset charset, byte... ba) {
@@ -519,7 +518,7 @@ public final class StringCoder {
 	}
 
 	public static char[] decodeChar(int off, int len, String charsetName, byte... ba) {
-		return decodeChar(off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset(charsetName), ba);
+		return decodeChar(off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset0(charsetName), ba);
 	}
 
 	public static char[] decodeChar(int off, int len, Charset charset, byte... ba) {

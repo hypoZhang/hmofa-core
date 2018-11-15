@@ -2,7 +2,7 @@ package com.hmofa.core.lang.exception;
 
 import com.hmofa.core.exception.BaseRuntimeException;
 import com.hmofa.core.exception.NullArgumentException;
-import com.hmofa.core.lang.bundle.StringFormat;
+import com.hmofa.core.lang.bundle.PlaceholderParse;
 import com.hmofa.core.lang.utils.UtilArray;
 import com.hmofa.core.lang.utils.UtilString;
 
@@ -10,7 +10,7 @@ public final class Assert {
 
 	public static <T> T notNull(T object, String message, Object... args) {
 		if (object == null)
-			throw new NullArgumentException(new StringFormat(message, "{}").getFormatString(args));
+			throw new NullArgumentException(PlaceholderParse.messageParse(message).stringFormat(true).addFormatValue(args).toString());
 		return object;
 	}
 
@@ -20,9 +20,9 @@ public final class Assert {
 
 	public static <T> T notEmpty(T object, String message, Object... args) {
 		if (UtilArray.isArrayEmpty(object))
-			throw new NullArgumentException(new StringFormat(message, "{}").getFormatString(args));
+			throw new NullArgumentException(PlaceholderParse.messageParse(message).stringFormat(true).addFormatValue(args).toString());
 		if (UtilString.isEmpty(object.toString()))
-			throw new NullArgumentException(new StringFormat(message, "{}").getFormatString(args));
+			throw new NullArgumentException(PlaceholderParse.messageParse(message).stringFormat(true).addFormatValue(args).toString());
 		return object;
 	}
 
@@ -39,7 +39,7 @@ public final class Assert {
 		notNull(object2);
 		int c = object1.compareTo(object2);
 		if (c > 0)
-			throw new IllegalArgumentException(new StringFormat(message, "{}").getFormatString(args));
+			throw new IllegalArgumentException(PlaceholderParse.messageParse(message).stringFormat(true).addFormatValue(args).toString());
 		return object1;
 	}
 
