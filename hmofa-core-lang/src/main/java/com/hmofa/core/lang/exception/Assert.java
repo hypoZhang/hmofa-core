@@ -2,7 +2,7 @@ package com.hmofa.core.lang.exception;
 
 import com.hmofa.core.exception.BaseRuntimeException;
 import com.hmofa.core.exception.NullArgumentException;
-import com.hmofa.core.lang.bundle.PlaceholderParse;
+import com.hmofa.core.lang.format.PlaceholderParse;
 import com.hmofa.core.lang.utils.UtilArray;
 import com.hmofa.core.lang.utils.UtilString;
 

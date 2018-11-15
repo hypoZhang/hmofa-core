@@ -12,6 +12,7 @@
   	<module>hmofa-core-resources</module>
     <module>hmofa-core-lang</module>
     <module>hmofa-core-examples</module>
+    <module>hmofa-core-i18n</module>
   </modules>
   <name>hmofa-core</name>
   

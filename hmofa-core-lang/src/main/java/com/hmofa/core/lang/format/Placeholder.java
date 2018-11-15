@@ -1,4 +1,4 @@
-package com.hmofa.core.lang.bundle;
+package com.hmofa.core.lang.format;
 
 import java.util.regex.Pattern;
 

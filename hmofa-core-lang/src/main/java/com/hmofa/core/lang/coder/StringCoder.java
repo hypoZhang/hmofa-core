@@ -365,30 +365,30 @@ public final class StringCoder {
 		return stringCoder.encoder(ca, off, len);
 	}
 
-	public static void encode(OutputStream out, CharSequence charseq) {
+	public static boolean encode(OutputStream out, CharSequence charseq) {
 		if (UtilString.isEmpty(charseq))
-			return;
-		encode(out, charseq, 0, charseq.length(), DEFAULT_UNI_CHARSET);
+			return false;
+		return encode(out, charseq, 0, charseq.length(), DEFAULT_UNI_CHARSET);
 	}
 
-	public static void encode(OutputStream out, CharSequence charseq, String charsetName) {
+	public static boolean encode(OutputStream out, CharSequence charseq, String charsetName) {
 		if (UtilString.isEmpty(charseq) || UtilString.isEmpty(charsetName))
-			return;
-		encode(out, charseq, 0, charseq.length(), lookupCharset0(charsetName));
+			return false;
+		return encode(out, charseq, 0, charseq.length(), lookupCharset0(charsetName));
 	}
 
-	public static void encode(OutputStream out, CharSequence charseq, Charset charset) {
+	public static boolean encode(OutputStream out, CharSequence charseq, Charset charset) {
 		if (UtilString.isEmpty(charseq) || charset == null)
-			return;
-		encode(out, charseq, 0, charseq.length(), charset);
+			return false;
+		return encode(out, charseq, 0, charseq.length(), charset);
 	}
 
-	public static void encode(OutputStream out, CharSequence charseq, int off, int len) {
-		encode(out, charseq, off, len, DEFAULT_UNI_CHARSET);
+	public static boolean encode(OutputStream out, CharSequence charseq, int off, int len) {
+		return encode(out, charseq, off, len, DEFAULT_UNI_CHARSET);
 	}
 
-	public static void encode(OutputStream out, CharSequence charseq, int off, int len, String charsetName) {
-		encode(out, charseq, off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset0(charsetName));
+	public static boolean encode(OutputStream out, CharSequence charseq, int off, int len, String charsetName) {
+		return encode(out, charseq, off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset0(charsetName));
 	}
 
 	/**
@@ -400,44 +400,45 @@ public final class StringCoder {
 	 * @param charset
 	 * @author 张海波  2017-2-28
 	 */
-	public static void encode(OutputStream out, CharSequence charseq, int off, int len, Charset charset) {
+	public static boolean encode(OutputStream out, CharSequence charseq, int off, int len, Charset charset) {
 		if (UtilString.isEmpty(charseq) || charset == null)
-			return;
+			return false;
 		char[] ca = getCharByCharSequence(charseq, off, len);
-		encode(out, off, len, charset, ca);
+		return encode(out, off, len, charset, ca);
 	}
 
-	public static void encode(OutputStream out, char... ca) {
+	public static boolean encode(OutputStream out, char... ca) {
 		if (UtilArray.isEmpty(ca))
-			return;
-		encode(out, 0, ca.length, DEFAULT_UNI_CHARSET, ca);
+			return false;
+		return encode(out, 0, ca.length, DEFAULT_UNI_CHARSET, ca);
 	}
 
-	public static void encode(OutputStream out, String charsetName, char... ca) {
+	public static boolean encode(OutputStream out, String charsetName, char... ca) {
 		if (UtilArray.isEmpty(ca) || UtilString.isEmpty(charsetName))
-			return;
-		encode(out, 0, ca.length, lookupCharset0(charsetName), ca);
+			return false;
+		return encode(out, 0, ca.length, lookupCharset0(charsetName), ca);
 	}
 
-	public static void encode(OutputStream out, Charset charset, char... ca) {
+	public static boolean encode(OutputStream out, Charset charset, char... ca) {
 		if (UtilArray.isEmpty(ca) || charset == null)
-			return;
-		encode(out, 0, ca.length, charset, ca);
+			return false;
+		return encode(out, 0, ca.length, charset, ca);
 	}
 
-	public static void encode(OutputStream out, int off, int len, char... ca) {
-		encode(out, off, len, DEFAULT_UNI_CHARSET, ca);
+	public static boolean encode(OutputStream out, int off, int len, char... ca) {
+		return encode(out, off, len, DEFAULT_UNI_CHARSET, ca);
 	}
 
-	public static void encode(OutputStream out, int off, int len, String charsetName, char... ca) {
-		encode(out, off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset0(charsetName), ca);
+	public static boolean encode(OutputStream out, int off, int len, String charsetName, char... ca) {
+		return encode(out, off, len, UtilString.isEmpty(charsetName) ? null : lookupCharset0(charsetName), ca);
 	}
 
-	public static void encode(OutputStream out, int off, int len, Charset charset, char... ca) {
+	public static boolean encode(OutputStream out, int off, int len, Charset charset, char... ca) {
 		if (UtilArray.isEmpty(ca) || charset == null)
-			return;
+			return false;
 		byte[] bytes = encode(off, len, charset, ca);
 		writeStream(out, bytes);
+		return true;
 	}
 
 	private static void writeStream(OutputStream out, byte[] bytes) {
@@ -464,6 +465,18 @@ public final class StringCoder {
 			return "";
 		return new String(decodeChar(0, ba.length, DEFAULT_UNI_CHARSET, ba));
 	}
+	
+	public static String decode(String charsetName, byte... ba) {
+		if (UtilArray.isEmpty(ba) || UtilString.isEmpty(charsetName))
+			return "";
+		return new String(decodeChar(0, ba.length, lookupCharset0(charsetName), ba));
+	}
+	
+	public static String decode(Charset charset, byte... ba) {
+		if (UtilArray.isEmpty(ba) || charset == null)
+			return "";
+		return new String(decodeChar(0, ba.length, charset, ba));
+	}
 
 	public static String decode(int off, int len, byte... ba) {
 		if (UtilArray.isEmpty(ba))
@@ -471,22 +484,10 @@ public final class StringCoder {
 		return new String(decodeChar(off, len, DEFAULT_UNI_CHARSET, ba));
 	}
 
-	public static String decode(String charsetName, byte... ba) {
-		if (UtilArray.isEmpty(ba) || UtilString.isEmpty(charsetName))
-			return "";
-		return new String(decodeChar(0, ba.length, lookupCharset0(charsetName), ba));
-	}
-
 	public static String decode(int off, int len, String charsetName, byte... ba) {
 		if (UtilArray.isEmpty(ba) || UtilString.isEmpty(charsetName))
 			return "";
 		return new String(decodeChar(off, len, lookupCharset0(charsetName), ba));
-	}
-
-	public static String decode(Charset charset, byte... ba) {
-		if (UtilArray.isEmpty(ba) || charset == null)
-			return "";
-		return new String(decodeChar(0, ba.length, charset, ba));
 	}
 
 	public static String decode(int off, int len, Charset charset, byte... ba) {

@@ -1,4 +1,4 @@
-package com.hmofa.core.lang.bundle;
+package com.hmofa.core.lang.format;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -109,7 +109,7 @@ public class PlaceholderParse implements Iterable<KeyValue<String, Boolean>> {
 		return originalString;
 	}
 	
-	public boolean isEmpty() {
+	public boolean isContainsPlaceholder() {
 		return compileList.isEmpty();
 	}
 
@@ -128,11 +128,11 @@ public class PlaceholderParse implements Iterable<KeyValue<String, Boolean>> {
 			KeyValue<String, Boolean> kvParam = getParamNameBy(kv.getTupleUUID());
 			if (placeholder.isPair()) {
 				sb.append(placeholder.getPrefix());
-				sb.append(kvParam.getKey());
+				sb.append(kvParam.getKey()).append("[").append(kvParam.getValue()).append("]");
 				sb.append(placeholder.getSuffix());
 			} else {
 				sb.append("<");
-				sb.append(kvParam.getKey());
+				sb.append(kvParam.getKey()).append("[").append(kvParam.getValue()).append("]");
 				sb.append(">");
 			}
 		}
@@ -196,10 +196,28 @@ public class PlaceholderParse implements Iterable<KeyValue<String, Boolean>> {
 	}
 	
 	/* 
+	 * 占位符分类：
+	 *    1、占位符有自定义名；
+	 *    2、占位符无自定义名；
+	 *    3、占位符自定义名，可有可无；
 	 * 
+	 * 【自定义名】 ： 指占位符 内指定的名称。例： 'select * from ${table} where id = ${0}' ; table 和  0 都表示自定义名
 	 * 
+	 * 占位符注意事项：
+	 * 	   1、 必须有前缀；
+	 *     2、正则表达式不能为空，并书写正确；
+	 *     3、正则表达式的行为，必须与你指定的 占位符分类相符；  如占位符 {x} 又可以 {} ,则类型为 可有可无 
 	 * 
-	 * 
+	 * =======================================
+	 * 格式化：
+	 *     1、支持按  占位符出现顺序  编号；
+	 *     2、支持按自定义名 替换；
+	 *     
+	 *     3、未指定自定义名   自动编号，从 0 开始；
+	 *     4、自动编号 参数，支持 从末尾 追加；
+	 *     
+	 *     5、自动编号参数 替换值，与自定义参数替换值 相互独立
+	 *     6、未指定 参数对应 替换值，则按原占位符信息输出
 	 * 
 	 */
 }

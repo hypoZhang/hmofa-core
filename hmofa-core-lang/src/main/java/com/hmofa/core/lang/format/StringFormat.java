@@ -1,4 +1,4 @@
-package com.hmofa.core.lang.bundle;
+package com.hmofa.core.lang.format;
 
 
 import java.util.HashSet;
@@ -66,9 +66,11 @@ public class StringFormat implements ICloneable<StringFormat> {
 	}
 		
 	public String toString() {
-		Iterator<KeyValue<String, Boolean>> it = parse.iterator();
+		
 		StringBuilder sb = new StringBuilder();
 		Set<KeyValue<String, Boolean>> paramAlready = this.append ? new HashSet<KeyValue<String, Boolean>>() : null;
+		
+		Iterator<KeyValue<String, Boolean>> it = parse.iterator();
 		while (it.hasNext()) {
 			KeyValue<String, Boolean> kv = it.next();
 			if (!kv.getValue()) {
@@ -98,7 +100,7 @@ public class StringFormat implements ICloneable<StringFormat> {
 				}
 			}
 		}
-		return sb.toString();
+		return sb.toString().trim();
 	}
 	
 	// 分自编号，和系统编号。 自编号 与 指定参数名  相同， 系统编号   为顺序索引位
@@ -124,6 +126,22 @@ public class StringFormat implements ICloneable<StringFormat> {
 	}
 	
 	/**
+	 * 从 0 开始  编号， 建立参数名映射  (用于系统编号)
+	 * <p>Discription:[按参数名 添加 替换的值]</p>
+	 * @param values  允许 为  Null
+	 * @return
+	 * @author hypo zhang  2018-11-14
+	 */
+	public final StringFormat addFormatValue(Object... values) {
+		int index = 0;
+		for (Object value : values) {
+			addFormatValue(index, value);
+			index++;
+		}
+		return this;
+	}
+	
+	/**
 	 * <p>Discription:[用于系统编号，设置替换值]</p>
 	 * @param index
 	 * @param value
@@ -134,21 +152,9 @@ public class StringFormat implements ICloneable<StringFormat> {
 		repNameValMap.put(new KeyValue<String, Boolean>(Integer.toString(index), true), value);
 		return this;
 	}
-	
-	/**
-	 * 从 0 开始  编号， 建立参数名映射  (用于系统编号)
-	 * <p>Discription:[按参数名 添加 替换的值]</p>
-	 * @param values  允许 为  Null
-	 * @return
-	 * @author hypo zhang  2018-11-14
-	 */
-	public final StringFormat addFormatValue(Object... values) {
-		int index = 0;
-		for (Object value : values) {
-			repNameValMap.put(new KeyValue<String, Boolean>(Integer.toString(index), true), value);
-			index++;
-		}
-		return this;
+		
+	public final StringFormat addFormatValueBy(int paramName, Object value) {
+		return addFormatValueBy(Integer.toString(paramName), value);
 	}
 	
 	/**
