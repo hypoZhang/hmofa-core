@@ -541,7 +541,7 @@ public class UtilNumber {
 		PadAtChar pad = UtilString.padAtChar;
 		String pads = pad.rightPad("", size, "#");
 		String format = "#";
-		format = UtilString.isEmpty(pads) ? format : format.concat(".").concat(pads);
+		format = UtilObject.isEmpty(pads) ? format : format.concat(".").concat(pads);
 		DecimalFormat df = new DecimalFormat(format);
 		return df.format(obj);
 	}

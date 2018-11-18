@@ -6,7 +6,7 @@ import java.net.URL;
 import com.hmofa.core.resources.input.ClassPathResource;
 
 import junit.runner.BaseTestRunner;
-import junit.runner.Sorter;
+
 
 /**
  * Hello world!
@@ -47,7 +47,7 @@ public class App {
 		
 		System.out.println("===================================");
 		
-		String file = "E:/unistudio/tees/hmofa-core/hmofa-core-resources/target/classes/com/hmofa/core/resources2/";
+//		String file = "E:/unistudio/tees/hmofa-core/hmofa-core-resources/target/classes/com/hmofa/core/resources2/";
 		String file2 = "/..";
 		File dir = new File(file2);
 		System.out.println("pathsep:" + File.pathSeparator);

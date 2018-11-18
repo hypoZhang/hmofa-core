@@ -1,4 +1,4 @@
-package org.hmofa.core.i18n;
+package com.hmofa.core.i18n;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

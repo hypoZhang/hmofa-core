@@ -1,7 +1,7 @@
 package com.hmofa.core.lang.helper;
 
 import com.hmofa.core.lang.IPadding;
-import com.hmofa.core.lang.utils.UtilString;
+import com.hmofa.core.lang.utils.UtilObject;
 
 public abstract class AbstractPadding implements IPadding {
 
@@ -9,14 +9,14 @@ public abstract class AbstractPadding implements IPadding {
 		if (str == null)
 			return null;
 		String padstr = buildPadStr(str, totalSize, padValue);
-		return UtilString.isEmpty(padstr) ? str.toString() : concat(padstr, str);
+		return UtilObject.isEmpty(padstr) ? str.toString() : concat(padstr, str);
 	}
 
 	public String rightPad(CharSequence str, int totalSize, CharSequence padValue) {
 		if (str == null)
 			return null;
 		String padstr = buildPadStr(str, totalSize, padValue);
-		return UtilString.isEmpty(padstr) ? str.toString() : concat(str, padstr);
+		return UtilObject.isEmpty(padstr) ? str.toString() : concat(str, padstr);
 	}
 
 	/** 计算填充字符数   */
@@ -47,7 +47,7 @@ public abstract class AbstractPadding implements IPadding {
 	}
 
 	private String buildPadStr(CharSequence str, int totalSize, CharSequence padValue) {
-		if (UtilString.isEmpty(padValue))
+		if (UtilObject.isEmpty(padValue))
 			return null;
 		char[] padCharValue = padValue.toString().toCharArray();
 		int padCharCount = clacPadCharLen(str, totalSize, padCharValue);

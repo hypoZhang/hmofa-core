@@ -7,9 +7,9 @@
     <artifactId>hmofa-core</artifactId>
     <version>0.1.0-SNAPSHOT</version>
   </parent>
-  <groupId>com.hmofa.core</groupId>
+  <groupId>com.hmofa.core.i18n</groupId>
   <artifactId>hmofa-core-i18n</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.1-SNAPSHOT</version>
   <name>hmofa-core-i18n</name>
   <url>http://maven.apache.org</url>
   <properties>

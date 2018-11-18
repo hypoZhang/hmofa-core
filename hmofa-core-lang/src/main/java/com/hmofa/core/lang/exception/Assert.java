@@ -4,7 +4,7 @@ import com.hmofa.core.exception.BaseRuntimeException;
 import com.hmofa.core.exception.NullArgumentException;
 import com.hmofa.core.lang.format.PlaceholderParse;
 import com.hmofa.core.lang.utils.UtilArray;
-import com.hmofa.core.lang.utils.UtilString;
+import com.hmofa.core.lang.utils.UtilObject;
 
 public final class Assert {
 
@@ -21,7 +21,7 @@ public final class Assert {
 	public static <T> T notEmpty(T object, String message, Object... args) {
 		if (UtilArray.isArrayEmpty(object))
 			throw new NullArgumentException(PlaceholderParse.messageParse(message).stringFormat(true).addFormatValue(args).toString());
-		if (UtilString.isEmpty(object.toString()))
+		if (UtilObject.isEmpty(object.toString()))
 			throw new NullArgumentException(PlaceholderParse.messageParse(message).stringFormat(true).addFormatValue(args).toString());
 		return object;
 	}

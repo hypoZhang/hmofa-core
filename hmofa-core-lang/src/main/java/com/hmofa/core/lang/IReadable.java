@@ -1,5 +1,7 @@
 package com.hmofa.core.lang;
 
+import java.io.Serializable;
+
 import org.dom4j.Branch;
 
 /**
@@ -10,7 +12,7 @@ import org.dom4j.Branch;
  * @version 1.0
  * @author hypo zhang
  */
-public interface IReadable {
+public interface IReadable extends Serializable {
 	
 	void buildXMLSerialize(Branch parent);
 	

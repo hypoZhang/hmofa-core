@@ -16,7 +16,7 @@ public class UtilClassLoader {
 	}
 		
 	public static Class<?> loadClass(String className, ClassLoader classLoader) throws LoadClassException {
-		if (UtilString.isWhitespace(className))
+		if (UtilObject.isBlank(className))
 			throw new LoadClassException();
 		try {
 			return classLoader.loadClass(className);

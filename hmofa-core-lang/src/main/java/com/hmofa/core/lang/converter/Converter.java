@@ -6,10 +6,6 @@ import com.hmofa.core.exception.ConversionException;
 import com.hmofa.core.exception.LoadClassException;
 import com.hmofa.core.lang.utils.UtilClassLoader;
 import com.hmofa.core.lang.utils.UtilObject;
-import com.hmofa.core.lang.utils.UtilString;
-
-
-
 
 
 /**
@@ -81,7 +77,7 @@ public final class Converter {
 	 * @author zhanghaibo3  2015-11-3
 	 */
 	public static Object convert(Object obj, String className) {
-		if(UtilString.isEmpty(className))
+		if(UtilObject.isEmpty(className))
 			throw new ConversionException(); // 目标类型不能为空类型
 		if (UtilObject.isEmpty(obj))
 			return null;

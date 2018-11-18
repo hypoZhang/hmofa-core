@@ -1,7 +1,5 @@
 package com.hmofa.core.lang.utils;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +16,6 @@ import com.hmofa.core.lang.tuple.KeyValue;
 import com.hmofa.core.lang.tuple.Tuple;
 
 
-
 /**
  * <dd>Description:[字符串工具]</dd>
  * <dt>UtilString</dt>
@@ -28,81 +25,13 @@ import com.hmofa.core.lang.tuple.Tuple;
  * @author 张海波
  */
 public class UtilString {
-
-	public static final boolean isNotNull(CharSequence str) {
-		return !isNull(str);
-	}
-	
-	public static final boolean isNull(CharSequence str) {
-		return str == null;
-	}
-	
-	public static final boolean isNotEmpty(CharSequence str) {
-		return !isEmpty(str);
-	}
-	
-	/**
-	 * <p>Discription:[是否为空]</p>
-	 * <pre>
-	 * isEmpty(null)     = true
-	 * isEmpty("")       = true
-	 * isEmpty("    ")   = false	空格
-	 * isEmpty(" bob ")  = false
-	 * isEmpty("\t \n \f \r \b") = false	制表\换行\换页\回车\退格 等转义符
-	 * </pre>
-	 * @param str
-	 * @return 空 true , 非空 false
-	 * @author zhanghaibo3  2015-11-2
-	 */
-	public static final boolean isEmpty(CharSequence str) {
-		return str == null || str.length() == 0;
-	}
-	
-	public static final boolean isNotWhitespace(CharSequence str) {
-		return !isWhitespace(str);
-	}
-
-	/**
-	 * <p>Discription:[是否为空]</p>
-	 * <pre>
-	 * isWhitespace(null)     = true
-	 * isWhitespace("")       = true
-	 * isWhitespace("    ")   = true	空格
-	 * isWhitespace(" bob ")  = false
-	 * isWhitespace("\t \n \f \r \b") = true  制表\换行\换页\回车\退格 等转义符
-	 * </pre>
-	 * @param str
-	 * @return 空 true , 非空 false
-	 * @author zhanghaibo3  2015-11-2
-	 */
-	public static final boolean isWhitespace(CharSequence str) {
-		if (isEmpty(str))
-			return true;
-		BigDecimal length = new BigDecimal(str.length());
-		int center = length.divide(divnum2, 0, RoundingMode.HALF_UP).intValue(); // 从前和中间开始取，减少循环
-		for (int index = 0; index < center; index++) {
-			char ch1 = str.charAt(index);
-			int index2 = index + center;
-			index2 = index2 >= str.length() ? str.length() - 1 : index2;
-			char ch2 = str.charAt(index2);
-			if (!Character.isWhitespace(ch1) || !Character.isWhitespace(ch2))
-				return false;
-		}
-		return true;
-	}
-	
-	private static final BigDecimal divnum2 = new BigDecimal("2");
-	
-	public static final boolean equals(CharSequence str1, CharSequence str2) {
-		return str1 == null ? str2 == null : str2 == null ? false : str1.toString().equals(str2.toString());
-	}
-	
+		
 	public static final boolean equalsIgnoreCase(CharSequence str1, CharSequence str2) {
 		return str1 == null ? str2 == null : str2 == null ? false : str1.toString().equalsIgnoreCase(str2.toString());
 	}
 	
 	public static final String replace(String inString, CharSequence target, CharSequence replacement) {
-		if (isEmpty(inString) || isEmpty(target) || replacement == null)
+		if (UtilObject.isEmpty(inString) || UtilObject.isEmpty(target) || replacement == null)
 			return inString;
 		return inString.replace(target, replacement);
 	}
@@ -193,7 +122,7 @@ public class UtilString {
 	
 	
 	public static boolean containsAsciiFullAngle(String str) {
-		if (isEmpty(str))
+		if (UtilObject.isEmpty(str))
 			return false;
 		for (int i = 0, len = str.length(); i < len; i++) {
 			if (isAsciiFullAngle(str.charAt(i)))
@@ -203,7 +132,7 @@ public class UtilString {
 	}
 	
 	public static boolean containsAsciiHalfAngle(String str) {
-		if (isEmpty(str))
+		if (UtilObject.isEmpty(str))
 			return false;
 		for (int i = 0, len = str.length(); i < len; i++) {
 			if (isAsciiHalfAngle(str.charAt(i)))
@@ -268,7 +197,7 @@ public class UtilString {
 	 * @author 张海波  2015-12-10
 	 */
 	public static int[] findIndex(String src, String pattern) {
-		if (isEmpty(src) || isEmpty(pattern))
+		if (UtilObject.isEmpty(src) || UtilObject.isEmpty(pattern))
 			return UtilArray.EMPTY_INT_ARRAY;
 		Pattern p = Pattern.compile(pattern);
 		return findIndex(src, p);
@@ -285,7 +214,7 @@ public class UtilString {
 	}
 
 	public static String[] findContent(String src, String pattern) {
-		if (isEmpty(src) || isEmpty(pattern))
+		if (UtilObject.isEmpty(src) || UtilObject.isEmpty(pattern))
 			return UtilArray.EMPTY_STRING_ARRAY;
 		Pattern p = Pattern.compile(pattern);
 		return findContent(src, p);
@@ -302,7 +231,7 @@ public class UtilString {
 	}
 	
 	public static List<KeyValue<Integer, String>> find(String src, String pattern) {
-		if (isEmpty(src) || isEmpty(pattern))
+		if (UtilObject.isEmpty(src) || UtilObject.isEmpty(pattern))
 			return new ArrayList<KeyValue<Integer, String>>();
 		Pattern p = Pattern.compile(pattern);
 		return find(src, p);
@@ -310,7 +239,7 @@ public class UtilString {
 
 	public static List<KeyValue<Integer, String>> find(String str, Pattern pattern) {
 		List<KeyValue<Integer, String>> list = new ArrayList<KeyValue<Integer, String>>();
-		if (isEmpty(str) || pattern == null)
+		if (UtilObject.isEmpty(str) || pattern == null)
 			return list;
 		Matcher m = pattern.matcher(str);
 		while (m.find())

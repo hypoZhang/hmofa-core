@@ -498,6 +498,10 @@ public class UtilArray {
 		System.arraycopy(original, 0, copy, 0, Math.min(original.length, newLength));
 		return copy;
 	}
+	
+	public final static <T> T[] copyOf(T... original) {
+		return copyOf(original.length, original);
+	}
 
 	public final static <T> T[] copyOf(int newLength, T... original) {
 		return Converter.cast(copyOf(original, newLength, original.getClass()));

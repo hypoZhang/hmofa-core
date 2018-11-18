@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import com.hmofa.core.lang.utils.UtilDate;
-import com.hmofa.core.lang.utils.UtilString;
+import com.hmofa.core.lang.utils.UtilObject;
 
 
 public final class TimestampConverter implements IConvertible<Timestamp> {
@@ -33,7 +33,7 @@ public final class TimestampConverter implements IConvertible<Timestamp> {
 			String dates = ovalue.toString();
 			dates = dates.trim().replace("  ", " ").replace("  ", " ").replace("  ", " ");
 			String datepattern = UtilDate.getDateFormatPattern(dates);
-			return UtilString.isEmpty(datepattern) ? null : UtilDate.parseTimestamp(dates, datepattern);
+			return UtilObject.isEmpty(datepattern) ? null : UtilDate.parseTimestamp(dates, datepattern);
 		}
 		
 		return null;

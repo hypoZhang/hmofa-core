@@ -6,15 +6,18 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.hmofa.core.exception.ConversionException;
+import com.hmofa.core.i18n.time.GenericTimeCriteria;
+import com.hmofa.core.i18n.time.TimeCriteria;
+import com.hmofa.core.lang.env.Variable;
 
 
 
@@ -154,22 +157,21 @@ public class UtilDate {
 		return calendar.getTimeInMillis();
 	}
 	
+	private static Week weekDays[] = { new Week(0), new Week(1), new Week(2), new Week(3), new Week(4), new Week(5), new Week(6) };
+	
 	/**
 	 * <p>Discription:[当前日期, 周几]</p>
 	 * @param srcTime  当前日期
 	 * @return
 	 * @author 张海波  2017-5-11
 	 */
-	public static int getDayOfWeek(long srcTime) {
+	public static Week getDayOfWeek(long srcTime) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(srcTime);
 		int idx = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		return weekDays[idx];
 	}
-	
-	private static int weekDays[] = { 0, 1, 2, 3, 4, 5, 6 };
-	
-	
+		
 	/**
 	 * <p>Discription:[当前日期,当月第几周]</p>
 	 * @param srcTime
@@ -378,10 +380,12 @@ public class UtilDate {
 	private static final boolean isSupportPattern(String patterns) {
 		if (patterns == null)
 			return false;
-//		Map<String, Pattern> dateFormatMap = ClassManager.getDatePatternMap();
-		Map<String, Pattern> dateFormatMap = null;
-		Pattern pattern = dateFormatMap.get(patterns);
-		return pattern != null;
+		for (Iterator<String> it = supportedTimeCriteria.keySet().iterator(); it.hasNext();) {
+			TimeCriteria timeCriteria = supportedTimeCriteria.get(it.next());
+			if(timeCriteria.isSupportTimeFormat(patterns))
+				return true;
+		}
+		return false;
 	}
 
 	public static final String formatDate(long srcTime) {
@@ -437,7 +441,7 @@ public class UtilDate {
 	 * @author zhanghaibo3  2015-12-3
 	 */
 	public static final String formatDate(Date srcTime, String pattern, Locale locale) {
-		if (UtilString.isEmpty(pattern))
+		if (UtilObject.isEmpty(pattern))
 			pattern = DEFAULT_TIME_FORMAT;
 		SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
 		return sdf.format(srcTime);
@@ -455,26 +459,32 @@ public class UtilDate {
 	 * @author zhanghaibo3  2016-2-6
 	 */
 	public static String getDateFormatPattern(CharSequence strDate) {
-//		Map<String, Pattern> dateFormatMap = ClassManager.getDatePatternMap();
-		Map<String, Pattern> dateFormatMap = null;
-		Iterator<String> it = dateFormatMap.keySet().iterator();
-		while (it.hasNext()) {
-			String patternstr = it.next();
-			Matcher matcher = dateFormatMap.get(patternstr).matcher(strDate);
-			if (matcher.matches())
-				return patternstr;
+		if(UtilObject.isBlank(strDate))
+			return null;
+		String timePattern = null;
+		for (Iterator<String> it = supportedTimeCriteria.keySet().iterator(); it.hasNext() && timePattern == null;) {
+			TimeCriteria timeCriteria = supportedTimeCriteria.get(it.next());
+			timePattern = timeCriteria.timeFormatPattern(strDate.toString(), Variable.defaultJvmLocale());
 		}
-		return null;
+		return timePattern;
 	}
 	
 	public static Date convertTimeZone(Timestamp cur, TimeZone timeZone) {
 		return null;
 	}
 
-//	private static Map<String, Pattern> dateFormatMap = new HashMap<String, Pattern>(40);
+	public static final String DEFAULT_TIME_FORMAT = GenericTimeCriteria.yyyy_MM_dd_HH_mm_ss_SSS;
+	
+	private static final Map<String, TimeCriteria> supportedTimeCriteria = buildTimeCriteriaMap();
+	
+	private static final Map<String, TimeCriteria> buildTimeCriteriaMap() {
+		Map<String, TimeCriteria> theEnvironment = new HashMap<String, TimeCriteria>();
+		
+		return Collections.unmodifiableMap(theEnvironment);
+	}
+	
 
-//	private static Map<String, ZoneShort> zoneShortMap = new HashMap<String, ZoneShort>();
-
+	
 	// 粗糙的日期 表达式   2014-09-30 01:01:59.0 可以 2014-9-3 1:0:0.0
 	static {
 		
@@ -501,20 +511,7 @@ public class UtilDate {
 		
 		
 	}
-
-	public static final String yyyy_MM_dd = "yyyy-MM-dd";
-	public static final String yyyy_MM_dd_HH_mm_ss = "yyyy-MM-dd HH:mm:ss";
-	public static final String yyyy_MM_dd_HH_mm_ss_SSS = "yyyy-MM-dd HH:mm:ss.SSS";
-	public static final String yyyy_MM_dd_HH_mm_ss__SSS = "yyyy-MM-dd HH:mm:ss,SSS";
-
-	public static final String yyyyMMddHHmmss = "yyyyMMddHHmmss";
-	public static final String yyyyMMddHHmmssSSS = "yyyyMMddHHmmssSSS";
-	public static final String yyyyMMdd = "yyyyMMdd";
-	public static final String yyyyMM = "yyyyMM";
-	public static final String yyyy = "yyyy";
-
-	public static final String DEFAULT_TIME_FORMAT = yyyy_MM_dd_HH_mm_ss_SSS;
-
+	
 	static class ZoneShort {
 
 		protected ZoneShort(String zoneShort, float gmt, String displayName) {

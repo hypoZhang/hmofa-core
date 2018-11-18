@@ -6,10 +6,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 import com.hmofa.core.lang.ICloneable;
-
 
 
 /**
@@ -21,80 +21,55 @@ import com.hmofa.core.lang.ICloneable;
  * @author 张海波
  */
 public class UtilObject {
-
-	/**
-	 * <p>Discription:[空值则替换  (默认 null)]</p>
-	 * <pre>
-	 * 空值三类: null | "" | "\t\n\b\r" (空值\空串\空控制符)
-	 * </pre>
-	 * @param obj			比较对象
-	 * @param replaceValue	替换值
-	 * @return
-	 * @author zhanghaibo3  2015-11-2
-	 */
-	public static final <T> T NVL(T obj, T replaceValue) {
-		return NVL(obj, replaceValue, NVL_TYPE_NULL);
+	
+	public static final <T> T nullNvl(T value, T defaultValue) {
+		return isNull(value) ? defaultValue : value;
+	}
+	
+	public static final <T> T emptyNvl(T value, T defaultValue) {
+		return isEmpty(value) ? defaultValue : value;
+	}
+	
+	public static final <T> T blankNvl(T value, T defaultValue) {
+		return isBlank(value) ? defaultValue : value;
+	}
+	
+	public static final boolean isNotNull(Object value) {
+		return !isNull(value);
+	}
+	
+	public static final boolean isNull(Object value) {
+		return value == null;
+	}
+	
+	public static final boolean isNotEmpty(Object value) {
+		return !isEmpty(value);
 	}
 
-	/**
-	 * <p>Discription:[空值则替换]</p>
-	 * <pre>
-	 * 空值三类: null | "" | "\t\n\b\r" (空值\空串\空控制符)
-	 * </pre>
-	 * @param obj			比较对象
-	 * @param replaceValue	替换值
-	 * @param emptyType		1 null | 2 empty | 3 whitespace
-	 * @return
-	 * @author zhanghaibo3  2015-11-2
-	 */
-	public static final <T> T NVL(T obj, T replaceValue, int emptyType) {
-		int type = getEmptyType(obj);
-		if (NVL_TYPE_NORMAL == type)
-			return obj;
-		return (NVL_TYPE_EMPTY == emptyType && type == NVL_TYPE_NULL) || emptyType == type ? replaceValue : obj;
+	public static final boolean isEmpty(Object value) {
+		boolean empty = value == null;
+		empty = !empty && value instanceof CharSequence ? value.toString().length() == 0 : empty;
+		empty = !empty && value instanceof Collection ? ((Collection<?>) value).isEmpty() : empty;
+		empty = !empty && value instanceof Map ? ((Map<?, ?>) value).isEmpty() : empty;
+		return empty;
 	}
-
-	/**
-	 * <p>Discription:[对象为空 (空值或空串)]</p>
-	 * @param obj
-	 * @return 空值或空串 = true | false
-	 * @author zhanghaibo3  2015-11-2
-	 */
-	public static final boolean isEmpty(Object obj) {
-		int type = getEmptyType(obj);
-		return type == NVL_TYPE_NULL || type == NVL_TYPE_EMPTY ? true : false;
+	
+	public static final boolean isNotBlank(Object value) {
+		return !isBlank(value);
 	}
-
-	/**
-	 * <p>Discription:[对象不为空 (空值或空串)]</p>
-	 * @param obj 
-	 * @return 空值或空串 = true | false
-	 * @author zhanghaibo3  2015-11-2
-	 */
-	public static final boolean isNotEmpty(Object obj) {
-		return !isEmpty(obj);
-	}
-
-	/**
-	 * <p>Discription:[取对象空值类型]</p>
-	 * @param obj
-	 * @return
-	 * @author zhanghaibo3  2015-11-2
-	 */
-	public static final int getEmptyType(Object obj) {
-		if (obj == null)
-			return NVL_TYPE_NULL;
-		if (!(obj instanceof String))
-			return NVL_TYPE_NORMAL;
-		String value = obj.toString();
-		return UtilString.isEmpty(value) ? NVL_TYPE_EMPTY : UtilString.isWhitespace(value) ? NVL_TYPE_WHITESPACE : NVL_TYPE_NORMAL;
+	
+	public static final boolean isBlank(Object value) {
+		boolean empty = isEmpty(value);
+		empty = !empty ? value.toString().trim().length() == 0 : empty;
+		return empty;
 	}
 
 	public static final boolean equals(Object obj1, Object obj2) {
-		return obj1 == null ? obj2 == null : obj1.equals(obj2);
+		return obj1 == null ? obj2 == null : obj1 == obj2 ? true : obj1.equals(obj2);
 	}
 	
-	public static Object clone(Object object) throws CloneNotSupportedException {
+	
+	public static Object clone(Object object) {
 		if (object == null) {
 			return null;
 		}
@@ -185,8 +160,4 @@ public class UtilObject {
 		return object;
 	}
 
-	public static final int NVL_TYPE_NORMAL = 0; // 非空
-	public static final int NVL_TYPE_NULL = 1; // null
-	public static final int NVL_TYPE_EMPTY = 2; // ""
-	public static final int NVL_TYPE_WHITESPACE = 3;// "\n"
 }
